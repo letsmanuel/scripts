@@ -136,11 +136,20 @@ end
  })
 
  function check_for_rush_moving()
+    local modelsFound = false
     for _, obj in ipairs(workspace:GetChildren()) do
         if obj:IsA("Model") and obj.Name == "RushMoving" and not notifiedModels[obj] then
-            create_notification("Entity!", "Rush is comming! Hide quickly", 5, "warning")
+            -- Trigger notification
+            create_notification("Entity!", "'RushMoving' has been detected!", 5, "warning")
+            print("No new 'RUSCHHHHHH!' models found in the workspace.")
+            -- Mark this model as notified
             notifiedModels[obj] = true
+            modelsFound = true
         end
+    end
+    -- Optional: Log a message if no models are found
+    if not modelsFound then
+        print("No new 'RushMoving' models found in the workspace.")
     end
 end
 
