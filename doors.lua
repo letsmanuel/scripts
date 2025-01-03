@@ -6,7 +6,7 @@ local Window = Rayfield:CreateWindow({
     LoadingSubtitle = "Never use my scripts without credit!",
     Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
  
-    DisableRayfieldPrompts = false,
+    DisableRayfieldPrompts = true,
     DisableBuildWarnings = true, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
  
     ConfigurationSaving = {
@@ -151,13 +151,50 @@ end
     end
     -- Optional: Log a message if no models are found
     if not modelsFound then
-        print("No new 'RushMoving' models found in the workspace.")
+       
+    end
+end
+
+function check_for_ambush_moving()
+    local modelsFound = false
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == "AmbushMoving" and not notifiedModels[obj] then
+            -- Trigger notification
+            create_notification("Entity!", "Ambush has spawned! Hide quickly!", 5, "alert-circle")
+            print("ambush")
+            notifiedModels[obj] = true
+            modelsFound = true
+        end
+    end
+    -- Optional: Log a message if no models are found
+    if not modelsFound then
+       
+    end
+end
+
+function check_for_seek_moving()
+    local modelsFound = false
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == "SeekMovingNewClone" and not notifiedModels[obj] then
+            -- Trigger notification
+            create_notification("Entity!", "Seek has spawned! Run quickly!", 5, "alert-circle")
+            print("seek")
+            -- Mark this model as notified
+            notifiedModels[obj] = true
+            modelsFound = true
+        end
+    end
+    -- Optional: Log a message if no models are found
+    if not modelsFound then
+       
     end
 end
 
 while true do
     if entitynotify == true then
     check_for_rush_moving()
+    check_for_seek_moving()
+    check_for_ambush_moving()
     end
     task.wait(0.2)
 end
