@@ -554,6 +554,7 @@ while true do
     check_for_rush_moving()
     check_for_seek_moving()
     check_for_ambush_moving()
+    check_for_eyes()
     end
     if thirdPerson == true then
         game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
