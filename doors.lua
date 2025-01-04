@@ -86,97 +86,220 @@ end
     end,
  })
 
+ local crucifixAssetId = "rbxassetid://12309588188" -- Asset ID of the crucifix
+
+-- Function to give the player the crucifix as a tool
+local function giveCrucifix(player)
+    -- Load the asset
+    local success, crucifixModel = pcall(function()
+        return game:GetService("InsertService"):LoadAsset(12309588188)
+    end)
+
+    if success and crucifixModel then
+        -- Ensure the model is a valid object
+        local tool = Instance.new("Tool")
+        tool.Name = "Crucifix"
+        tool.RequiresHandle = true -- Crucifix tool requires a handle to work
+        tool.CanBeDropped = true
+        tool.Grip = CFrame.new()
+
+        -- Find the handle (usually a part that should be used as the "handle" for the tool)
+        local handle = crucifixModel:FindFirstChildWhichIsA("BasePart")
+        if handle then
+            handle.Name = "Handle"  -- The tool requires a part named "Handle"
+            handle.Parent = tool
+        else
+            print("Crucifix does not have a valid handle part.")
+            return
+        end
+
+        -- Parent the model as a child of the Tool
+        crucifixModel.Parent = tool
+
+        -- Set the tool's parent to the player's backpack
+        tool.Parent = player:WaitForChild("Backpack")
+
+        -- Activate the click-to-delete functionality
+        tool.Activated:Connect(function()
+            -- When the tool is activated (clicked), check for the target
+            local mouse = player:GetMouse()
+            local target = mouse.Target
+
+            -- If the target is a model, delete it
+            if target and target.Parent and target.Parent:IsA("Model") then
+                target.Parent:Destroy()  -- Deletes the entire model
+            end
+        end)
+    else
+        warn("Failed to load crucifix asset.")
+    end
+end
+
  local espObjects = {}
 
--- Define colors for each model type
-local modelColors = {
-    KeyObtain = Color3.fromRGB(255, 0, 0), -- Red
-    LiveHintBook = Color3.fromRGB(0, 255, 0), -- Green
-    Wardrobe = Color3.fromRGB(0, 0, 255), -- Blue
-    Door = Color3.fromRGB(255, 255, 0), -- Yellow
-    Dresser = Color3.fromRGB(255, 165, 0), -- Orange
-}
+ -- Define colors for each model type
+ local modelColors = {
+     KeyObtain = Color3.fromRGB(255, 0, 0), -- Red
+     LiveHintBook = Color3.fromRGB(0, 255, 0), -- Green
+     Wardrobe = Color3.fromRGB(0, 0, 255), -- Blue
+     Door = Color3.fromRGB(255, 255, 0), -- Yellow
+     Dresser = Color3.fromRGB(255, 165, 0), -- Orange
+     LeverForGate = Color3.fromRGB(128, 0, 128), -- Purple
+     FigureRig = Color3.fromRGB(0, 255, 255), -- Cyan
+     RushMoving = Color3.fromRGB(255, 0, 255), -- Magenta
+     SeekMovingNewClone = Color3.fromRGB(128, 128, 0), -- Olive
+     AmbushMoving = Color3.fromRGB(128, 0, 0), -- Dark Red
+ }
+ 
+ -- Function to create an ESP highlight with label
+ local function create_esp(object, modelName)
+     if not object:IsA("BasePart") then return end
+ 
+     -- Highlight box
+     local adornment = Instance.new("BoxHandleAdornment")
+     adornment.Name = "ESPAdornment"
+     adornment.Adornee = object
+     adornment.AlwaysOnTop = true
+     adornment.ZIndex = 10
+     adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
+     adornment.Color3 = modelColors[modelName] or Color3.new(1, 1, 1) -- Default to white if no color is defined
+     adornment.Transparency = 0.5
+     adornment.Parent = object
+ 
+     -- Label
+     local billboard = Instance.new("BillboardGui")
+     billboard.Name = "ESPLabel"
+     billboard.Adornee = object
+     billboard.Size = UDim2.new(0, 75, 0, 25) -- Smaller text
+     billboard.StudsOffset = Vector3.new(0, 2, 0) -- Position above the object
+     billboard.AlwaysOnTop = true
+ 
+     local textLabel = Instance.new("TextLabel")
+     textLabel.Text = modelName
+     textLabel.Size = UDim2.new(1, 0, 1, 0)
+     textLabel.BackgroundTransparency = 1
+     textLabel.TextColor3 = modelColors[modelName] or Color3.new(1, 1, 1)
+     textLabel.TextScaled = true
+     textLabel.Font = Enum.Font.SourceSansBold
+     textLabel.TextSize = 14 -- Reduced text size
+     textLabel.Parent = billboard
+ 
+     billboard.Parent = object
+ 
+     -- Track the object
+     espObjects[object] = {adornment, billboard}
+ end
+ 
+ -- Function to remove all ESP highlights and labels
+ local function remove_esp()
+     for object, components in pairs(espObjects) do
+         for _, component in ipairs(components) do
+             if component and component.Parent then
+                 component:Destroy()
+             end
+         end
+     end
+     espObjects = {}
+ end
+ 
+ -- Function to check recursively and apply ESP
+ local function check_and_highlight(object)
+     if object:IsA("Model") then
+         -- Handle KeyObtain
+         if object.Name == "KeyObtain" then
+             local hitbox = object:FindFirstChild("Hitbox")
+             if hitbox and hitbox:IsA("BasePart") then
+                 local key = hitbox:FindFirstChild("Key")
+                 if key and key:IsA("BasePart") and not espObjects[key] then
+                     create_esp(key, "KeyObtain")
+                 end
+             end
+         -- Handle other models
+         elseif modelColors[object.Name] then
+             local part = object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart")
+             if part and not espObjects[part] then
+                 create_esp(part, object.Name)
+             end
+         end
+     end
+ 
+     -- Recursively check children
+     for _, child in ipairs(object:GetChildren()) do
+         check_and_highlight(child)
+     end
+ end
+ 
+ -- Function to toggle ESP on
+ local function toggle_esp_on()
+     check_and_highlight(workspace)
+ end
 
--- Function to create an ESP highlight with label
-local function create_esp(object, modelName)
-    if not object:IsA("BasePart") then return end
+ local originalLightingData = {}
 
-    -- Highlight box
-    local adornment = Instance.new("BoxHandleAdornment")
-    adornment.Name = "ESPAdornment"
-    adornment.Adornee = object
-    adornment.AlwaysOnTop = true
-    adornment.ZIndex = 10
-    adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
-    adornment.Color3 = modelColors[modelName] or Color3.new(1, 1, 1) -- Default to white if no color is defined
-    adornment.Transparency = 0.5
-    adornment.Parent = object
-
-    -- Label
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESPLabel"
-    billboard.Adornee = object
-    billboard.Size = UDim2.new(0, 100, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 2, 0) -- Position above the object
-    billboard.AlwaysOnTop = true
-
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Text = modelName
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.TextColor3 = modelColors[modelName] or Color3.new(1, 1, 1)
-    textLabel.TextScaled = true
-    textLabel.Parent = billboard
-
-    billboard.Parent = object
-
-    -- Track the object
-    espObjects[object] = {adornment, billboard}
-end
-
--- Function to remove all ESP highlights and labels
-local function remove_esp()
-    for object, components in pairs(espObjects) do
-        for _, component in ipairs(components) do
-            if component and component.Parent then
-                component:Destroy()
-            end
-        end
+-- Function to save the current lighting properties
+local function saveLightingData()
+    originalLightingData = {}
+    for _, property in ipairs({
+        "Ambient",
+        "Brightness",
+        "ColorShift_Bottom",
+        "ColorShift_Top",
+        "EnvironmentDiffuseScale",
+        "EnvironmentSpecularScale",
+        "ExposureCompensation",
+        "FogColor",
+        "FogEnd",
+        "FogStart",
+        "GlobalShadows",
+        "OutdoorAmbient",
+        "ShadowSoftness",
+    }) do
+        originalLightingData[property] = game.Lighting[property]
     end
-    espObjects = {}
 end
 
--- Function to check recursively and apply ESP
-local function check_and_highlight(object)
-    if object:IsA("Model") then
-        -- Handle KeyObtain
-        if object.Name == "KeyObtain" then
-            local hitbox = object:FindFirstChild("Hitbox")
-            if hitbox and hitbox:IsA("BasePart") then
-                local key = hitbox:FindFirstChild("Key")
-                if key and key:IsA("BasePart") and not espObjects[key] then
-                    create_esp(key, "KeyObtain")
-                end
-            end
-        -- Handle other models
-        elseif modelColors[object.Name] then
-            local part = object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart")
-            if part and not espObjects[part] then
-                create_esp(part, object.Name)
-            end
-        end
-    end
-
-    -- Recursively check children
-    for _, child in ipairs(object:GetChildren()) do
-        check_and_highlight(child)
+-- Function to restore the original lighting properties
+local function restoreLightingData()
+    for property, value in pairs(originalLightingData) do
+        game.Lighting[property] = value
     end
 end
 
--- Function to toggle ESP on
-local function toggle_esp_on()
-    check_and_highlight(workspace)
+-- Function to enable fullbright
+local function enableFullbright()
+    game.Lighting.Ambient = Color3.new(1, 1, 1) -- Pure white ambient light
+    game.Lighting.Brightness = 10
+    game.Lighting.ColorShift_Bottom = Color3.new(0, 0, 0)
+    game.Lighting.ColorShift_Top = Color3.new(0, 0, 0)
+    game.Lighting.EnvironmentDiffuseScale = 1
+    game.Lighting.EnvironmentSpecularScale = 1
+    game.Lighting.ExposureCompensation = 0
+    game.Lighting.FogColor = Color3.new(1, 1, 1)
+    game.Lighting.FogEnd = 100000 -- Effectively disables fog
+    game.Lighting.FogStart = 0
+    game.Lighting.GlobalShadows = false
+    game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+    game.Lighting.ShadowSoftness = 0
 end
+
+-- Variables to track the fullbright state
+local isFullbrightEnabled = false
+
+-- Function to toggle fullbright on and off
+local function toggleFullbright()
+    if isFullbrightEnabled then
+        restoreLightingData()
+    else
+        enableFullbright()
+    end
+    isFullbrightEnabled = not isFullbrightEnabled
+end
+
+local function setupFullbright()
+    saveLightingData() -- Start with fullbright enabled
+end
+
+setupFullbright()
 
 
  local function create_head_light(player)
@@ -287,6 +410,15 @@ end
     end,
  })
 
+ local FullbrightToggle = Tab:CreateToggle({
+    Name = "Fullbright",
+    CurrentValue = false,
+    Flag = "FullbrightToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+    	toggleFullbright()
+    end,
+ })
+
  local Divider1 = ExploitTab:CreateDivider()
 
  local headLightPowerSlider = ExploitTab:CreateSlider({
@@ -330,7 +462,14 @@ end
     end,
  })
 
+ local Divider2 = ExploitTab:CreateDivider()
 
+ local CruzifixGiverButton = ExploitTab:CreateButton({
+    Name = "Give yourself a cruzifix",
+    Callback = function()
+  giveCrucifix(game.Players.LocalPlayer)
+    end,
+ })
 
 
 
