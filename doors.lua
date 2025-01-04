@@ -401,8 +401,8 @@ end
             Duration = 25,
             Image = "coins",
          })
-         for i = 1, 7 do
-         for i = 1, 50 do
+         for i = 1, 8 do
+         for i = 1, 100 do
             game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(0, -5000, 0))  -- You can adjust the Y value for deeper teleportation
             wait(0)  -- Wait for the specified delay before the next teleport
         end
@@ -412,7 +412,7 @@ end
 
         Rayfield:Notify({
             Title = "Finished.",
-            Content = "The Fragment is now spawned.",
+            Content = "The Fragment should now be spawned.",
             Duration = 5,
             Image = "coins",
          })
