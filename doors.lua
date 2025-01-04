@@ -7,7 +7,6 @@ local MissingOutOn = [[
 * God Mode
 ]]
 
-
 local player = game.Players.LocalPlayer
 local groupId = 16393296 
 local rankThreshold = 4 
@@ -104,9 +103,17 @@ local function godmode_tick()
         return
     end
 
+    -- Check if we can get valid positions for the models
+    local rushMovingPosition = rushMoving and rushMoving.PrimaryPart and rushMoving.PrimaryPart.Position
+    local ambushMovingPosition = ambushMoving and ambushMoving.PrimaryPart and ambushMoving.PrimaryPart.Position
+
+    -- If the primary parts don't exist, use the model's position center (or skip if still nil)
+    rushMovingPosition = rushMovingPosition or (rushMoving and rushMoving:GetModelCFrame().Position)
+    ambushMovingPosition = ambushMovingPosition or (ambushMoving and ambushMoving:GetModelCFrame().Position)
+
     -- Check proximity to the models
-    local isNearRush = rushMoving and (rushMoving.Position - currentPosition).Magnitude <= THRESHOLD
-    local isNearAmbush = ambushMoving and (ambushMoving.Position - currentPosition).Magnitude <= THRESHOLD
+    local isNearRush = rushMovingPosition and (rushMovingPosition - currentPosition).Magnitude <= THRESHOLD
+    local isNearAmbush = ambushMovingPosition and (ambushMovingPosition - currentPosition).Magnitude <= THRESHOLD
 
     if isNearRush or isNearAmbush then
         -- Save the original position if not already saved
@@ -125,6 +132,35 @@ local function godmode_tick()
         end
     end
 end
+
+local godmode_crash_reason = ""
+
+local function godmode_crash()
+    Rayfield:Notify({
+        Title = "Error",
+        Content = "Godmode had a Problem and we had to shut it down.",
+        Duration = 7,
+        Image = "badge-plus",
+    })
+    Rayfield:Notify({
+        Title = "Details:",
+        Content = godmode_crash_reason,
+        Duration = 20,
+        Image = "badge-plus",
+    })
+end
+
+local function godmode_tick_handle()
+    local success, errorMsg = pcall(function()
+        godmode_tick()
+    end)
+
+    if not success then
+        godmode_crash()
+        godmode_crash_reason = errorMsg
+    end
+end
+
 
 
 
@@ -979,7 +1015,7 @@ while true do
     end
 
     if Godmode == true then
-        godmode_tick()
+        godmode_tick_handle()
     end
     task.wait(0.2)
 end
