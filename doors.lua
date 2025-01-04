@@ -66,69 +66,54 @@ end
 local Godmode = false
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local doPingDetectionSetting = true
 
 local originalPosition = nil
 
--- Get services
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local Players = game:GetService("Players")
-
--- Get the local player and their character
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-
--- Wait for the HumanoidRootPart to load
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local ping = player:GetNetworkPing()
 
 local function godmode_tick()
-        -- Find the models in Workspace
-        local rushMoving = Workspace:FindFirstChild("RushMoving")
-        local ambushMoving = Workspace:FindFirstChild("AmbushMoving")
-    
-        -- Get the current position of the player
-        local currentPosition = humanoidRootPart.Position
-    
-        -- Function to retrieve a model's position
-        local function getModelPosition(model)
-            if model then
-                if model.PrimaryPart then
-                    return model.PrimaryPart.Position
-                else
-                    -- Fallback to the model's pivot position if PrimaryPart is not set
-                    return model:GetPivot().Position
-                end
-            end
-            return nil
-        end
-    
-        -- Get positions of the models
-        local rushPosition = getModelPosition(rushMoving)
-        local ambushPosition = getModelPosition(ambushMoving)
-    
-        -- Determine if the player is near any of the models
-        local isNearRush = rushPosition and (rushPosition - currentPosition).Magnitude <= 40000000
-        local isNearAmbush = ambushPosition and (ambushPosition - currentPosition).Magnitude <= 40000000
-    
-        -- If the player is near RushMoving or AmbushMoving
-        if isNearRush or isNearAmbush then
-            -- Save the original position if not already saved
-            if not originalPosition then
-                originalPosition = currentPosition
-            end
-    
-            -- Calculate the new position (50 studs above the original position)
-            local newPosition = originalPosition + Vector3.new(0, 50, 0)
-    
-            -- Teleport the player to the new position
+    local TELEPORT_OFFSET = 50
+    local HIGH_PING_OFFSET = 100  -- Higher teleport offset if ping > 200
+
+    local player = game:GetService("Players").LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    local currentPosition = humanoidRootPart.Position
+    local originalPosition = originalPosition or currentPosition  -- Store original position if not set
+
+    local ping = player:GetNetworkPing()  -- Get player's network ping
+    local teleportOffset = ping > 200 and HIGH_PING_OFFSET or TELEPORT_OFFSET  -- Set higher offset if ping is over 200
+
+    -- Check for dangerous models and teleport the player
+    local workspace = game:GetService("Workspace")
+    local entities = {
+        RushMoving = workspace:FindFirstChild("RushMoving"),
+        AmbushMoving = workspace:FindFirstChild("AmbushMoving"),
+        A60 = workspace:FindFirstChild("A60"),
+        A120 = workspace:FindFirstChild("A120")
+    }
+
+    local dangerDetected = false
+
+    for name, entity in pairs(entities) do
+        if entity then
+            print("Entity detected:", name)
+            local newPosition = currentPosition + Vector3.new(0, teleportOffset, 0)
             humanoidRootPart.CFrame = CFrame.new(newPosition)
-        else
-            -- If the player moves away and an original position is saved, teleport them back
-            if originalPosition then
-                humanoidRootPart.CFrame = CFrame.new(originalPosition)
-                originalPosition = nil -- Clear the saved position
-            end
+            print("Teleported due to entity:", name)
+            dangerDetected = true
+            break
         end
+    end
+
+    -- If no danger detected, return the player to the original position
+    if not dangerDetected and originalPosition then
+        humanoidRootPart.CFrame = CFrame.new(originalPosition)
+        originalPosition = nil
+    end
 end
 
 local godmode_crash_reason = ""
@@ -503,6 +488,15 @@ end
     Flag = "shownotificationsforsuccessToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
    shownotificationsforsuccess = Value
+    end,
+ })
+
+ local doPingSafetyToggle = SettingsTab:CreateToggle({
+    Name = "Detect Bad Wifi",
+    CurrentValue = true,
+    Flag = "doPingSafetyToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+   doPingDetectionSetting = Value
     end,
  })
 
