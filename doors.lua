@@ -410,7 +410,7 @@ end
     end,
  })
 
- local FullbrightToggle = Tab:CreateToggle({
+ local FullbrightToggle = ExploitTab:CreateToggle({
     Name = "Fullbright",
     CurrentValue = false,
     Flag = "FullbrightToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
