@@ -88,61 +88,95 @@ end
 
  local espObjects = {}
 
- -- Function to create an ESP highlight
- local function create_esp(object)
-     if not object:IsA("BasePart") then return end
- 
-     local adornment = Instance.new("BoxHandleAdornment")
-     adornment.Name = "ESPAdornment"
-     adornment.Adornee = object
-     adornment.AlwaysOnTop = true
-     adornment.ZIndex = 10
-     adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
-     adornment.Color3 = Color3.new(1, 0, 0) -- Red color
-     adornment.Transparency = 0.5
-     adornment.Parent = object
- 
-     table.insert(espObjects, adornment)
- end
- 
- -- Function to remove all ESP highlights
- local function remove_esp()
-     for _, esp in ipairs(espObjects) do
-         if esp and esp.Parent then
-             esp:Destroy()
-         end
-     end
-     espObjects = {}
- end
- 
- -- Function to check recursively and apply ESP
- local function check_and_highlight(object)
-     if object:IsA("Model") then
-         -- Handle KeyObtain
-         if object.Name == "KeyObtain" then
-             local hitbox = object:FindFirstChild("Hitbox")
-             if hitbox and hitbox:IsA("BasePart") then
-                 local key = hitbox:FindFirstChild("Key")
-                 if key and key:IsA("BasePart") then
-                     create_esp(key)
-                 end
-             end
-         -- Handle other models
-         elseif object.Name == "LiveHintBook" or object.Name == "Wardrobe" or object.Name == "Door" or object.Name == "Dresser" then
-             create_esp(object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart"))
-         end
-     end
- 
-     -- Recursively check children
-     for _, child in ipairs(object:GetChildren()) do
-         check_and_highlight(child)
-     end
- end
- 
+-- Define colors for each model type
+local modelColors = {
+    KeyObtain = Color3.fromRGB(255, 0, 0), -- Red
+    LiveHintBook = Color3.fromRGB(0, 255, 0), -- Green
+    Wardrobe = Color3.fromRGB(0, 0, 255), -- Blue
+    Door = Color3.fromRGB(255, 255, 0), -- Yellow
+    Dresser = Color3.fromRGB(255, 165, 0), -- Orange
+}
 
- local function toggle_esp_on()
-     check_and_highlight(workspace)
- end
+-- Function to create an ESP highlight with label
+local function create_esp(object, modelName)
+    if not object:IsA("BasePart") then return end
+
+    -- Highlight box
+    local adornment = Instance.new("BoxHandleAdornment")
+    adornment.Name = "ESPAdornment"
+    adornment.Adornee = object
+    adornment.AlwaysOnTop = true
+    adornment.ZIndex = 10
+    adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
+    adornment.Color3 = modelColors[modelName] or Color3.new(1, 1, 1) -- Default to white if no color is defined
+    adornment.Transparency = 0.5
+    adornment.Parent = object
+
+    -- Label
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESPLabel"
+    billboard.Adornee = object
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0) -- Position above the object
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Text = modelName
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = modelColors[modelName] or Color3.new(1, 1, 1)
+    textLabel.TextScaled = true
+    textLabel.Parent = billboard
+
+    billboard.Parent = object
+
+    -- Track the object
+    espObjects[object] = {adornment, billboard}
+end
+
+-- Function to remove all ESP highlights and labels
+local function remove_esp()
+    for object, components in pairs(espObjects) do
+        for _, component in ipairs(components) do
+            if component and component.Parent then
+                component:Destroy()
+            end
+        end
+    end
+    espObjects = {}
+end
+
+-- Function to check recursively and apply ESP
+local function check_and_highlight(object)
+    if object:IsA("Model") then
+        -- Handle KeyObtain
+        if object.Name == "KeyObtain" then
+            local hitbox = object:FindFirstChild("Hitbox")
+            if hitbox and hitbox:IsA("BasePart") then
+                local key = hitbox:FindFirstChild("Key")
+                if key and key:IsA("BasePart") and not espObjects[key] then
+                    create_esp(key, "KeyObtain")
+                end
+            end
+        -- Handle other models
+        elseif modelColors[object.Name] then
+            local part = object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart")
+            if part and not espObjects[part] then
+                create_esp(part, object.Name)
+            end
+        end
+    end
+
+    -- Recursively check children
+    for _, child in ipairs(object:GetChildren()) do
+        check_and_highlight(child)
+    end
+end
+
+-- Function to toggle ESP on
+local function toggle_esp_on()
+    check_and_highlight(workspace)
+end
 
 
  local function create_head_light(player)
