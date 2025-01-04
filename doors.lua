@@ -531,6 +531,7 @@ function check_for_seek_moving()
     end
 end
 
+
 while true do
     if entitynotify == true then
     check_for_rush_moving()
