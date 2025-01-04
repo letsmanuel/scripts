@@ -531,6 +531,23 @@ function check_for_seek_moving()
     end
 end
 
+function check_for_eyes()
+    local modelsFound = false
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == "Eyes" and not notifiedModels[obj] then
+            -- Trigger notification
+            create_notification("Entity!", "Eyes has spawned! Look away!", 5, "alert-circle")
+            print("eyes")
+            -- Mark this model as notified
+            notifiedModels[obj] = true
+            modelsFound = true
+        end
+    end
+    -- Optional: Log a message if no models are found
+    if not modelsFound then
+       
+    end
+end
 
 while true do
     if entitynotify == true then
