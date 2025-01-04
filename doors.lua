@@ -17,6 +17,7 @@ local function displayDoorsMessage(message, durationInMilliseconds)
     if caption then
         -- Set the Caption text
         caption.Text = message
+        caption.Visible = true
         
         -- Tween transparency in (fade in)
         local tweenService = game:GetService("TweenService")
@@ -36,6 +37,8 @@ local function displayDoorsMessage(message, durationInMilliseconds)
         local tweenOut = tweenService:Create(caption, tweenInfoOut, goalOut)
         tweenOut:Play()
         tweenOut.Completed:Wait()
+        sound:Destroy()
+        caption.Visible = false
     else
         warn("Caption not found!")
     end
