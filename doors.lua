@@ -7,6 +7,7 @@ local MissingOutOn = [[
 * God Mode
 ]]
 
+
 local player = game.Players.LocalPlayer
 local groupId = 16393296 
 local rankThreshold = 4 
