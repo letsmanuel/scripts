@@ -67,70 +67,68 @@ local Godmode = false
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 
--- Distance threshold and teleport offset
--- Variables
-local player = game.Players.LocalPlayer
-local Workspace = game:GetService("Workspace")
-
--- Distance threshold and teleport offset
-local THRESHOLD = 150
-local TELEPORT_OFFSET = 50
-
--- Table to store the player's original position
 local originalPosition = nil
 
--- Function to handle proximity and teleportation
+-- Get services
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+
+-- Get the local player and their character
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Wait for the HumanoidRootPart to load
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
 local function godmode_tick()
-    -- Try to find the models in Workspace
-    local rushMoving = Workspace:FindFirstChild("RushMoving")
-    local ambushMoving = Workspace:FindFirstChild("AmbushMoving")
-
-    -- Get the player's character and HumanoidRootPart
-    local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then
-        return
-    end
-
-    local humanoidRootPart = character.HumanoidRootPart
-    local currentPosition = humanoidRootPart.Position
-
-    -- If neither model exists, reset the player's position and return
-    if not rushMoving and not ambushMoving then
-        if originalPosition then
-            humanoidRootPart.CFrame = CFrame.new(originalPosition)
-            originalPosition = nil -- Clear the saved position
+        -- Find the models in Workspace
+        local rushMoving = Workspace:FindFirstChild("RushMoving")
+        local ambushMoving = Workspace:FindFirstChild("AmbushMoving")
+    
+        -- Get the current position of the player
+        local currentPosition = humanoidRootPart.Position
+    
+        -- Function to retrieve a model's position
+        local function getModelPosition(model)
+            if model then
+                if model.PrimaryPart then
+                    return model.PrimaryPart.Position
+                else
+                    -- Fallback to the model's pivot position if PrimaryPart is not set
+                    return model:GetPivot().Position
+                end
+            end
+            return nil
         end
-        return
-    end
-
-    -- Check if we can get valid positions for the models
-    local rushMovingPosition = rushMoving and rushMoving.PrimaryPart and rushMoving.PrimaryPart.Position
-    local ambushMovingPosition = ambushMoving and ambushMoving.PrimaryPart and ambushMoving.PrimaryPart.Position
-
-    -- If the primary parts don't exist, use the model's position center (or skip if still nil)
-    rushMovingPosition = rushMovingPosition or (rushMoving and rushMoving:GetModelCFrame().Position)
-    ambushMovingPosition = ambushMovingPosition or (ambushMoving and ambushMoving:GetModelCFrame().Position)
-
-    -- Check proximity to the models
-    local isNearRush = rushMovingPosition and (rushMovingPosition - currentPosition).Magnitude <= THRESHOLD
-    local isNearAmbush = ambushMovingPosition and (ambushMovingPosition - currentPosition).Magnitude <= THRESHOLD
-
-    if isNearRush or isNearAmbush then
-        -- Save the original position if not already saved
-        if not originalPosition then
-            originalPosition = currentPosition
+    
+        -- Get positions of the models
+        local rushPosition = getModelPosition(rushMoving)
+        local ambushPosition = getModelPosition(ambushMoving)
+    
+        -- Determine if the player is near any of the models
+        local isNearRush = rushPosition and (rushPosition - currentPosition).Magnitude <= THRESHOLD
+        local isNearAmbush = ambushPosition and (ambushPosition - currentPosition).Magnitude <= THRESHOLD
+    
+        -- If the player is near RushMoving or AmbushMoving
+        if isNearRush or isNearAmbush then
+            -- Save the original position if not already saved
+            if not originalPosition then
+                originalPosition = currentPosition
+            end
+    
+            -- Calculate the new position (50 studs above the original position)
+            local newPosition = originalPosition + Vector3.new(0, TELEPORT_OFFSET, 0)
+    
+            -- Teleport the player to the new position
+            humanoidRootPart.CFrame = CFrame.new(newPosition)
+        else
+            -- If the player moves away and an original position is saved, teleport them back
+            if originalPosition then
+                humanoidRootPart.CFrame = CFrame.new(originalPosition)
+                originalPosition = nil -- Clear the saved position
+            end
         end
-
-        -- Teleport the player 50 studs above their original position
-        local newPosition = originalPosition + Vector3.new(0, TELEPORT_OFFSET, 0)
-        humanoidRootPart.CFrame = CFrame.new(newPosition)
-    else
-        -- If the models are far, teleport the player back to their original position
-        if originalPosition then
-            humanoidRootPart.CFrame = CFrame.new(originalPosition)
-            originalPosition = nil -- Clear the saved position
-        end
-    end
 end
 
 local godmode_crash_reason = ""
