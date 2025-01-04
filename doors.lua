@@ -714,7 +714,7 @@ else
     
 
     local titelPROnotbought = PremiumTab:CreateLabel("You have not bought Premium.", "rewind")
-    local Paragraph = Tab:CreateParagraph({Title = "What you are missing out for:", Content = ""})
+    local Paragraph = PremiumTab:CreateParagraph({Title = "What you are missing out for:", Content = ""})
 end
 
 
