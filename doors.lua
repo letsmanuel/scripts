@@ -1,7 +1,48 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local VIP
+local function displayDoorsMessage(message, durationInMilliseconds)
+    -- Convert milliseconds to seconds
+    local durationInSeconds = durationInMilliseconds / 1000
 
+    -- Get the LocalPlayer and the PlayerGui
+    local player = game.Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    
+    -- Try to find the MainUI and MainFrame
+    local mainUI = playerGui:WaitForChild("MainUI")
+    local mainFrame = mainUI:WaitForChild("MainFrame")
+    
+    -- Try to find the Caption
+    local caption = mainFrame:FindFirstChild("Caption")
+    if caption then
+        -- Set the Caption text
+        caption.Text = message
+        
+        -- Tween transparency in (fade in)
+        local tweenService = game:GetService("TweenService")
+        local tweenInfoIn = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
+        local goalIn = {TextTransparency = 0}
+        local tweenIn = tweenService:Create(caption, tweenInfoIn, goalIn)
+        tweenIn:Play()
+        
+        -- Play the sound
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://3848738542"
+        sound.Parent = playerGui
+        sound:Play()
+        wait(durationInSeconds)
+        local tweenInfoOut = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+        local goalOut = {TextTransparency = 1}
+        local tweenOut = tweenService:Create(caption, tweenInfoOut, goalOut)
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+    else
+        warn("Caption not found!")
+    end
+end
+
+
+local VIP
 local MissingOutOn = [[
 * Spawn a Glitch Fragment
 * Cruzify everything (Mobile Support)
@@ -17,9 +58,9 @@ local playerRank = player:GetRankInGroup(groupId)
 
 
 if playerRank >= rankThreshold then
-   VIP = false
+   VIP = true
 else
-    VIP = true
+    VIP = false
 end
 
 local Window = Rayfield:CreateWindow({
@@ -179,6 +220,7 @@ if VIP == true then
     Duration = 6.5,
     Image = "badge-plus",
  })
+ displayDoorsMessage("Your Premium Status was loaded!", 5000)
 else
     Rayfield:Notify({
         Title = "Info:",
@@ -186,6 +228,9 @@ else
         Duration = 6.5,
         Image = "badge-plus",
     })
+    displayDoorsMessage("This is a free Preview!", 3000)
+    wait(3)
+    displayDoorsMessage("Unlock all features by buying PRO.", 10000)
 end
 
  local MainTab = Window:CreateTab("Script Hub", "archive") -- Title, Image
