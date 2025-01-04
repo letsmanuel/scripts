@@ -387,9 +387,9 @@ end
             Duration = 25,
             Image = "coins",
          })
-         for i = 1, 5 do
+         for i = 1, 2000 do
             game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(0, -5000, 0))  -- You can adjust the Y value for deeper teleportation
-            wait(5)  -- Wait for the specified delay before the next teleport
+            wait(0)  -- Wait for the specified delay before the next teleport
         end
         Rayfield:Notify({
             Title = "Finished.",
