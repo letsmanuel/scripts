@@ -4,7 +4,8 @@ local VIP
 local MissingOutOn = [[
 * Spawn a Glitch Fragment
 * Cruzify everything (Mobile Support)
-* God Mode
+* Bypass Screach / Snare / Giggle
+* Bypass Eyes Damage
 ]]
 
 local player = game.Players.LocalPlayer
@@ -15,9 +16,9 @@ local playerRank = player:GetRankInGroup(groupId)
 
 
 if playerRank >= rankThreshold then
-   VIP = true
+   VIP = false
 else
-    VIP = false
+    VIP = true
 end
 
 local Window = Rayfield:CreateWindow({
@@ -180,7 +181,7 @@ if VIP == true then
 else
     Rayfield:Notify({
         Title = "Info:",
-        Content = "You can support us by buying PRO!",
+        Content = "You can support us by buying PRO and unlocking many BEAUTIFUL FEATURES!",
         Duration = 6.5,
         Image = "badge-plus",
     })
@@ -684,31 +685,31 @@ end
 
 local DividerPro1 = PremiumTab:CreateDivider()
 
-local GodModeToggle = PremiumTab:CreateToggle({
-    Name = "Godmode",
-    CurrentValue = false,
-    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Value)
-    Godmode = Value
-    if shownotificationsforsuccess == true then
-    if Value == true then
-        Rayfield:Notify({
-            Title = "Success",
-            Content = "Godmode for Rush/Ambush is now on!",
-            Duration = 3,
-            Image = 4483362458,
-         })
-    else
-        Rayfield:Notify({
-            Title = "Success",
-            Content = "Godmode for Rush/Ambush is now off!",
-            Duration = 3,
-            Image = 4483362458,
-         })
-    end
-end
-    end,
- })
+--local GodModeToggle = PremiumTab:CreateToggle({
+--    Name = "Godmode",
+--    CurrentValue = false,
+--    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+--    Callback = function(Value)
+--    Godmode = Value
+--    if shownotificationsforsuccess == true then
+--   if Value == true then
+--      Rayfield:Notify({
+--            Title = "Success",
+--            Content = "Godmode for Rush/Ambush is now on!",
+--            Duration = 3,
+--           Image = 4483362458,
+--         })
+--    else
+--        Rayfield:Notify({
+--            Title = "Success",
+--            Content = "Godmode for Rush/Ambush is now off!",
+--            Duration = 3,
+--           Image = 4483362458,
+--         })
+--    end
+--end
+--    end,
+-- })
 else
     
 
