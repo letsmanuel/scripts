@@ -107,8 +107,8 @@ local function godmode_tick()
         local ambushPosition = getModelPosition(ambushMoving)
     
         -- Determine if the player is near any of the models
-        local isNearRush = rushPosition and (rushPosition - currentPosition).Magnitude <= 150
-        local isNearAmbush = ambushPosition and (ambushPosition - currentPosition).Magnitude <= 150
+        local isNearRush = rushPosition and (rushPosition - currentPosition).Magnitude <= 400
+        local isNearAmbush = ambushPosition and (ambushPosition - currentPosition).Magnitude <= 400
     
         -- If the player is near RushMoving or AmbushMoving
         if isNearRush or isNearAmbush then
@@ -1016,5 +1016,5 @@ while true do
     if Godmode == true then
         godmode_tick_handle()
     end
-    task.wait(0.2)
+    task.wait(0.1)
 end
