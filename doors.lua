@@ -7,8 +7,14 @@ local MissingOutOn = [[
 * God Mode
 ]]
 
-local hasPremium = game.Players.LocalPlayer:HasGamePass(13600173502)
-if hasPremium then
+local player = game.Players.LocalPlayer
+local groupId = 16393296 
+local rankThreshold = 4 
+
+local playerRank = player:GetRankInGroup(groupId)
+
+
+if playerRank >= rankThreshold then
    VIP = true
 else
     VIP = false
