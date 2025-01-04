@@ -383,7 +383,7 @@ end
          wait(3)
          Rayfield:Notify({
             Title = "One Moment...",
-            Content = "Summoning the Glitch Fragment...",
+            Content = "Summoning the Glitch Fragment... Please wait!",
             Duration = 25,
             Image = "coins",
          })
