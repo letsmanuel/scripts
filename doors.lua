@@ -25,7 +25,7 @@ local Window = Rayfield:CreateWindow({
     Name = "P6auls Doors Hub",
     Icon = "skull", -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
     LoadingTitle = "Loading...",
-    LoadingSubtitle = "Never use my scripts without credit!",
+    LoadingSubtitle = "Give Credit!",
     Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
  
     DisableRayfieldPrompts = true,
