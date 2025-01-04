@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
     Name = "P6auls Doors Hub",
-    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+    Icon = "skull", -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
     LoadingTitle = "Loading...",
     LoadingSubtitle = "Never use my scripts without credit!",
     Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
@@ -88,6 +88,7 @@ end
 
  local shownotificationsforsuccess = true
  local entitynotify = false
+ local thirdPerson = false
 
  local shownotificationsforsuccessToggle = SettingsTab:CreateToggle({
     Name = "Show success messages",
@@ -134,6 +135,23 @@ end
    entitynotify = Value
     end,
  })
+
+ local thirdPersonToggle = ExploitTab:CreateToggle({
+    Name = "Third Person Mode",
+    CurrentValue = false,
+    Flag = "thirdPersonToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+   thirdPerson = Value
+    end,
+ })
+
+
+
+
+
+
+
+
 
  local notifiedModels = {}
 
@@ -195,6 +213,17 @@ while true do
     check_for_rush_moving()
     check_for_seek_moving()
     check_for_ambush_moving()
+    end
+    if thirdPerson == true then
+        game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        if shownotificationsforsuccess == true then
+            create_notification("Success", "You are now in Third Person. If not, try to toggle again!", 3, "badge-alert")
+            end
+    else
+        game.Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+        if shownotificationsforsuccess == true then
+            create_notification("Success", "You are now in First Person. If not, try to toggle again!", 3, "badge-alert")
+        end
     end
     task.wait(0.2)
 end
