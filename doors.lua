@@ -388,7 +388,7 @@ end
             Image = "coins",
          })
          for i = 1, 5 do
-            game.Players.Localplayer.Character:SetPrimaryPartCFrame(CFrame.new(0, -5000, 0))  -- You can adjust the Y value for deeper teleportation
+            game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(0, -5000, 0))  -- You can adjust the Y value for deeper teleportation
             wait(5)  -- Wait for the specified delay before the next teleport
         end
         Rayfield:Notify({
