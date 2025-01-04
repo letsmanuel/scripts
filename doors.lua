@@ -375,20 +375,34 @@ end
     Name = "Summon Glitch Fragment (Run before opening a door!)",
     Callback = function()
         Rayfield:Notify({
-            Title = "Do not move!",
+            Title = "INFOS SOON",
             Content = "Starting in 3 seconds.",
             Duration = 3,
             Image = "coins",
          })
-         wait(3)
+         wait(2)
+         Rayfield:Notify({
+            Title = "WARNING:",
+            Content = "We will teleport you ontop of the roof. JUMP DOWN AS FAST AS YOU CAN!!!",
+            Duration = 5,
+            Image = "coins",
+         })
+         wait(5)
+         Rayfield:Notify({
+            Title = "Good luck!",
+            Content = "Starting in 1 second!!",
+            Duration = 5,
+            Image = "coins",
+         })
+         wait(1)
          Rayfield:Notify({
             Title = "One Moment...",
             Content = "Summoning the Glitch Fragment... Please wait!",
             Duration = 25,
             Image = "coins",
          })
-         for i = 1, 5 do
-         for i = 1, 100 do
+         for i = 1, 7 do
+         for i = 1, 50 do
             game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(0, -5000, 0))  -- You can adjust the Y value for deeper teleportation
             wait(0)  -- Wait for the specified delay before the next teleport
         end
