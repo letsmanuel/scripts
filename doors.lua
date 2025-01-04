@@ -46,6 +46,7 @@ end
 
 
 local VIP
+local displayedPing = 0
 local MissingOutOn = [[
 * Spawn a Glitch Fragment
 * Cruzify everything (Mobile Support)
@@ -578,6 +579,7 @@ end
 
 
 
+
  if VIP == true then
  local getFragmentButton = PremiumTab:CreateButton({
     Name = "Summon Glitch Fragment (Run before opening a door!)",
@@ -1045,6 +1047,22 @@ function check_for_eyes()
     end
 end
 
+local function calculatePingNotifier()
+    local ping = player:GetNetworkPing()
+    if ping >= 500 and not displayedPing == 1 then
+        displayedPing = 1
+        displayDoorsMessage("Extreme Ping! 500+", 2000)
+    elseif ping >= 200 and not displayedPing == 2 then
+        displayedPing = 2
+        displayDoorsMessage("High ping! 200+ Play Careful!", 2000)
+    elseif ping <= 199 and displayedPing == 1 or ping <= 199 and displayedPing == 2 then
+        displayedPing = 2
+        displayDoorsMessage("Ping is now back to normal.", 2000)
+    end
+end
+
+
+
 while true do
     if entitynotify == true then
     check_for_rush_moving()
@@ -1085,5 +1103,13 @@ while true do
     if Godmode == true then
         godmode_tick_handle()
     end
+
+    local ping = player:GetNetworkPing()
+    if doPingDetectionSetting == true then
+        calculatePingNotifier()
+    end
+
+
+
     task.wait(0.1)
 end
