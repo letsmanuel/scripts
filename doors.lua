@@ -354,6 +354,7 @@ end
  local shownotificationsforsuccess = true
  local entitynotify = false
  local thirdPerson = false
+ local thirdPersonEverTriggerd = false
  local notifiedthirdPerson = 0
  local Esp = false
  local seekExists = false
@@ -409,7 +410,8 @@ end
     CurrentValue = false,
     Flag = "thirdPersonToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
-   thirdPerson = Value
+        thirdPersonEverTriggerd = true
+        thirdPerson = Value
     end,
  })
 
@@ -474,8 +476,10 @@ end
     Flag = "headLightPowerSlider", 
     Callback = function(Value)
     headLightPowerSlider = Value
+    if headlight == true then
     delete_head_light(game.Players.LocalPlayer)
     create_head_light(game.Players.LocalPlayer)
+    end
     end,
  })
 
@@ -488,8 +492,10 @@ end
     Flag = "headLightRangeSlider", 
     Callback = function(Value)
     headlightRange = Value
+    if headlight == true then
     delete_head_light(game.Players.LocalPlayer)
     create_head_light(game.Players.LocalPlayer)
+    end
     end,
  })
 
@@ -498,9 +504,11 @@ end
     CurrentValue = false,
     Flag = "headLightToggle", 
     Callback = function(Value)
-    if headlight == false then
+    if Value == false then
+        headlight = false
         delete_head_light(game.Players.LocalPlayer)
     else
+        headlight = true
         create_head_light(game.Players.LocalPlayer)
     end
     end,
@@ -511,7 +519,40 @@ end
  local CruzifixGiverButton = ExploitTab:CreateButton({
     Name = "Give yourself a cruzifix",
     Callback = function()
-  giveCrucifix(game.Players.LocalPlayer)
+  		-- The function that takes place when the button is pressed
+          local shadow=game:GetObjects("rbxassetid://11498423088")[1]
+          shadow.Parent = game.Players.LocalPlayer.Backpack
+          local Players = game:GetService("Players")
+          local Plr = Players.LocalPlayer
+          local Char = Plr.Character or Plr.CharacterAdded:Wait()
+          local Hum = Char:WaitForChild("Humanoid")
+          local RightArm = Char:WaitForChild("RightUpperArm")
+          local LeftArm = Char:WaitForChild("LeftUpperArm")
+          local RightC1 = RightArm.RightShoulder.C1
+          local LeftC1 = LeftArm.LeftShoulder.C1
+                  local function setupCrucifix(tool)
+                  RightArm.Name = "R_Arm"
+                  LeftArm.Name = "L_Arm"
+                  
+                  RightArm.RightShoulder.C1 = RightC1 * CFrame.Angles(math.rad(-90), math.rad(-15), 0)
+                  LeftArm.LeftShoulder.C1 = LeftC1 * CFrame.new(-0.2, -0.3, -0.5) * CFrame.Angles(math.rad(-125), math.rad(25), math.rad(25))
+                  for _, v in next, Hum:GetPlayingAnimationTracks() do
+                      v:Stop()
+                  end
+                  end
+          shadow.Equipped:Connect(function()
+          setupCrucifix(shadow)
+          game.Players.LocalPlayer:SetAttribute("Hidden", true)
+          end)
+           
+          shadow.Unequipped:Connect(function()
+              game.Players.LocalPlayer:SetAttribute("Hidden", false)
+                  RightArm.Name = "RightUpperArm"
+                  LeftArm.Name = "LeftUpperArm"
+                  
+                  RightArm.RightShoulder.C1 = RightC1
+                  LeftArm.LeftShoulder.C1 = LeftC1
+          end)
     end,
  })
 
@@ -604,15 +645,15 @@ while true do
     check_for_ambush_moving()
     check_for_eyes()
     end
-    if thirdPerson == true then
-        game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+    if thirdPerson == true and thirdPersonEverTriggerd == true then
         if shownotificationsforsuccess == true and notifiedthirdPerson == 0 then
+            game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
             notifiedthirdPerson = 1
             create_notification("Success", "You are now in Third Person. If not, try to toggle again!", 3, "badge-alert")
         end
-    else
-        game.Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
+    elseif thirdPersonEverTriggerd == true then
         if shownotificationsforsuccess == true and notifiedthirdPerson ==  1 then
+            game.Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
             notifiedthirdPerson = 0
             create_notification("Success", "You are now in First Person. If not, try to toggle again!", 3, "badge-alert")
         end
