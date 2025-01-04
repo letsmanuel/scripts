@@ -1,5 +1,19 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local VIP
+local MissingOutOn = [[
+* Spawn a Glitch Fragment
+* Cruzify everything (Mobile Support)
+* God Mode
+]]
+
+local hasPremium = player:HasGamePass(13600173502)
+if hasPremium then
+   VIP = true
+else
+    VIP = false
+end
+
 local Window = Rayfield:CreateWindow({
     Name = "P6auls Doors Hub",
     Icon = "skull", -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -13,7 +27,7 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {
        Enabled = true,
        FolderName = nil, -- Create a custom folder for your hub/game
-       FileName = "doorshub"
+       FileName = "p6aulsdoorshub."
     },
  
     Discord = {
@@ -43,13 +57,92 @@ local Window = Rayfield:CreateWindow({
     })
 end
 
+local Godmode = false
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+-- Distance threshold and teleport offset
+-- Variables
+local player = game.Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+
+-- Distance threshold and teleport offset
+local THRESHOLD = 150
+local TELEPORT_OFFSET = 50
+
+-- Table to store the player's original position
+local originalPosition = nil
+
+-- Function to handle proximity and teleportation
+local function godmode_tick()
+    -- Try to find the models in Workspace
+    local rushMoving = Workspace:FindFirstChild("RushMoving")
+    local ambushMoving = Workspace:FindFirstChild("AmbushMoving")
+
+    -- Get the player's character and HumanoidRootPart
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return
+    end
+
+    local humanoidRootPart = character.HumanoidRootPart
+    local currentPosition = humanoidRootPart.Position
+
+    -- If neither model exists, reset the player's position and return
+    if not rushMoving and not ambushMoving then
+        if originalPosition then
+            humanoidRootPart.CFrame = CFrame.new(originalPosition)
+            originalPosition = nil -- Clear the saved position
+        end
+        return
+    end
+
+    -- Check proximity to the models
+    local isNearRush = rushMoving and (rushMoving.Position - currentPosition).Magnitude <= THRESHOLD
+    local isNearAmbush = ambushMoving and (ambushMoving.Position - currentPosition).Magnitude <= THRESHOLD
+
+    if isNearRush or isNearAmbush then
+        -- Save the original position if not already saved
+        if not originalPosition then
+            originalPosition = currentPosition
+        end
+
+        -- Teleport the player 50 studs above their original position
+        local newPosition = originalPosition + Vector3.new(0, TELEPORT_OFFSET, 0)
+        humanoidRootPart.CFrame = CFrame.new(newPosition)
+    else
+        -- If the models are far, teleport the player back to their original position
+        if originalPosition then
+            humanoidRootPart.CFrame = CFrame.new(originalPosition)
+            originalPosition = nil -- Clear the saved position
+        end
+    end
+end
+
+
 
  Rayfield:Notify({
-    Title = "Welcome",
+    Title = "Welcome back.",
     Content = "This script is still in Beta!",
     Duration = 6.5,
     Image = "badge-alert",
  })
+
+if VIP == true then
+ Rayfield:Notify({
+    Title = "Thank you!",
+    Content = "Thanks for supporting our development!",
+    Duration = 6.5,
+    Image = "badge-plus",
+ })
+else
+    Rayfield:Notify({
+        Title = "Info:",
+        Content = "You can support us by buying PRO!",
+        Duration = 6.5,
+        Image = "badge-plus",
+    })
+end
 
  local MainTab = Window:CreateTab("Script Hub", "archive") -- Title, Image
 
@@ -371,6 +464,10 @@ end
     end,
  })
 
+
+
+
+ if VIP == true then
  local getFragmentButton = PremiumTab:CreateButton({
     Name = "Summon Glitch Fragment (Run before opening a door!)",
     Callback = function()
@@ -419,6 +516,154 @@ end
     end,
  })
 
+ local CruzifixGiverButton = PremiumTab:CreateButton({
+    Name = "Give yourself a cruzifix",
+    Callback = function()
+        local shadow = game:GetObjects("rbxassetid://11498423088")[1]
+        shadow.Parent = game.Players.LocalPlayer.Backpack
+        
+        local Players = game:GetService("Players")
+        local TweenService = game:GetService("TweenService")
+        local Debris = game:GetService("Debris")
+        local UserInputService = game:GetService("UserInputService")
+        local Plr = Players.LocalPlayer
+        local Char = Plr.Character or Plr.CharacterAdded:Wait()
+        local Hum = Char:WaitForChild("Humanoid")
+        local RightArm = Char:WaitForChild("RightUpperArm")
+        local LeftArm = Char:WaitForChild("LeftUpperArm")
+        local RightC1 = RightArm.RightShoulder.C1
+        local LeftC1 = LeftArm.LeftShoulder.C1
+        
+        local toolActive = false
+        
+        local function setupCrucifix(tool)
+            print("Setting up crucifix tool")
+            RightArm.Name = "R_Arm"
+            LeftArm.Name = "L_Arm"
+        
+            RightArm.RightShoulder.C1 = RightC1 * CFrame.Angles(math.rad(-90), math.rad(-15), 0)
+            LeftArm.LeftShoulder.C1 = LeftC1 * CFrame.new(-0.2, -0.3, -0.5) * CFrame.Angles(math.rad(-125), math.rad(25), math.rad(25))
+        
+            print("Stopped current animations")
+            for _, v in next, Hum:GetPlayingAnimationTracks() do
+                v:Stop()
+            end
+        end
+        
+        local function crucifyObject(target)
+            if not target:IsA("BasePart") and not target:IsA("Model") then 
+                print("Invalid target clicked: ", target.Name)
+                return 
+            end
+        
+            print("Crucifying object: ", target.Name)
+        
+            -- Add visual effects
+            local glow = Instance.new("SelectionBox")
+            glow.Adornee = target
+            glow.LineThickness = 0.05
+            glow.Color3 = Color3.fromRGB(0, 255, 255)
+            glow.Parent = target
+            print("Added glow effect to: ", target.Name)
+        
+            local particleEmitter = Instance.new("ParticleEmitter")
+            particleEmitter.Texture = "rbxassetid://258128463" -- Example texture for a holy effect
+            particleEmitter.Rate = 20
+            particleEmitter.Lifetime = NumberRange.new(1)
+            particleEmitter.Speed = NumberRange.new(0.5, 1)
+            particleEmitter.Parent = target
+            print("Added particle effect to: ", target.Name)
+        
+            -- Animate object flying into the void
+            local targetPosition = target.Position - Vector3.new(0, 100, 0)
+            local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Linear)
+            local tween = TweenService:Create(target, tweenInfo, {Position = targetPosition})
+        
+            print("Started tween animation for: ", target.Name)
+            tween:Play()
+            
+            -- Cleanup after effect
+            tween.Completed:Connect(function()
+                print("Object reached void and is being destroyed: ", target.Name)
+                target:Destroy()
+            end)
+        
+            Debris:AddItem(glow, 3) -- Automatically remove the glow after 3 seconds
+            Debris:AddItem(particleEmitter, 3) -- Automatically remove particles after 3 seconds
+        end
+        
+        shadow.Equipped:Connect(function()
+            print("Equipped the shadow tool")
+            setupCrucifix(shadow)
+            game.Players.LocalPlayer:SetAttribute("Hidden", true)
+            toolActive = true
+        
+            -- Create a listener for tapping/clicking objects
+            local function onInputBegan(input, gameProcessed)
+                if gameProcessed then return end
+        
+                if toolActive and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+                    local mouse = Plr:GetMouse()
+                    if mouse.Target then -- Check if the mouse or touch is pointing at something
+                        print("Tapped/Clicked on: ", mouse.Target.Name)
+                        crucifyObject(mouse.Target) -- Apply crucifix effect
+                    else
+                        print("No valid target tapped/clicked")
+                    end
+                end
+            end
+        
+            UserInputService.InputBegan:Connect(onInputBegan)
+        end)
+        
+        shadow.Unequipped:Connect(function()
+            print("Unequipped the shadow tool")
+            game.Players.LocalPlayer:SetAttribute("Hidden", false)
+            RightArm.Name = "RightUpperArm"
+            LeftArm.Name = "LeftUpperArm"
+        
+            RightArm.RightShoulder.C1 = RightC1
+            LeftArm.LeftShoulder.C1 = LeftC1
+            print("Reset arm names and positions")
+            toolActive = false
+        end)
+        
+    end,
+ })
+
+local DividerPro1 = PremiumTab:CreateDivider()
+
+local GodModeToggle = Tab:CreateToggle({
+    Name = "Godmode",
+    CurrentValue = false,
+    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+    Godmode = Value
+    if shownotificationsforsuccess == true then
+    if Value == true then
+        Rayfield:Notify({
+            Title = "Success",
+            Content = "Godmode for Rush/Ambush is now on!",
+            Duration = 3,
+            Image = 4483362458,
+         })
+    else
+        Rayfield:Notify({
+            Title = "Success",
+            Content = "Godmode for Rush/Ambush is now off!",
+            Duration = 3,
+            Image = 4483362458,
+         })
+    end
+end
+    end,
+ })
+else
+    
+
+    local titelPROnotbought = PremiumTab:CreateLabel("You have not bought Premium.", "rewind")
+    local Paragraph = Tab:CreateParagraph({Title = "What you are missing out for:", Content = ""})
+end
 
 
 
@@ -571,120 +816,7 @@ end
 
  local Divider2 = ExploitTab:CreateDivider()
 
- local CruzifixGiverButton = ExploitTab:CreateButton({
-    Name = "Give yourself a cruzifix",
-    Callback = function()
-        local shadow = game:GetObjects("rbxassetid://11498423088")[1]
-        shadow.Parent = game.Players.LocalPlayer.Backpack
-        
-        local Players = game:GetService("Players")
-        local TweenService = game:GetService("TweenService")
-        local Debris = game:GetService("Debris")
-        local UserInputService = game:GetService("UserInputService")
-        local Plr = Players.LocalPlayer
-        local Char = Plr.Character or Plr.CharacterAdded:Wait()
-        local Hum = Char:WaitForChild("Humanoid")
-        local RightArm = Char:WaitForChild("RightUpperArm")
-        local LeftArm = Char:WaitForChild("LeftUpperArm")
-        local RightC1 = RightArm.RightShoulder.C1
-        local LeftC1 = LeftArm.LeftShoulder.C1
-        
-        local toolActive = false
-        
-        local function setupCrucifix(tool)
-            print("Setting up crucifix tool")
-            RightArm.Name = "R_Arm"
-            LeftArm.Name = "L_Arm"
-        
-            RightArm.RightShoulder.C1 = RightC1 * CFrame.Angles(math.rad(-90), math.rad(-15), 0)
-            LeftArm.LeftShoulder.C1 = LeftC1 * CFrame.new(-0.2, -0.3, -0.5) * CFrame.Angles(math.rad(-125), math.rad(25), math.rad(25))
-        
-            print("Stopped current animations")
-            for _, v in next, Hum:GetPlayingAnimationTracks() do
-                v:Stop()
-            end
-        end
-        
-        local function crucifyObject(target)
-            if not target:IsA("BasePart") and not target:IsA("Model") then 
-                print("Invalid target clicked: ", target.Name)
-                return 
-            end
-        
-            print("Crucifying object: ", target.Name)
-        
-            -- Add visual effects
-            local glow = Instance.new("SelectionBox")
-            glow.Adornee = target
-            glow.LineThickness = 0.05
-            glow.Color3 = Color3.fromRGB(0, 255, 255)
-            glow.Parent = target
-            print("Added glow effect to: ", target.Name)
-        
-            local particleEmitter = Instance.new("ParticleEmitter")
-            particleEmitter.Texture = "rbxassetid://258128463" -- Example texture for a holy effect
-            particleEmitter.Rate = 20
-            particleEmitter.Lifetime = NumberRange.new(1)
-            particleEmitter.Speed = NumberRange.new(0.5, 1)
-            particleEmitter.Parent = target
-            print("Added particle effect to: ", target.Name)
-        
-            -- Animate object flying into the void
-            local targetPosition = target.Position - Vector3.new(0, 100, 0)
-            local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Linear)
-            local tween = TweenService:Create(target, tweenInfo, {Position = targetPosition})
-        
-            print("Started tween animation for: ", target.Name)
-            tween:Play()
-            
-            -- Cleanup after effect
-            tween.Completed:Connect(function()
-                print("Object reached void and is being destroyed: ", target.Name)
-                target:Destroy()
-            end)
-        
-            Debris:AddItem(glow, 3) -- Automatically remove the glow after 3 seconds
-            Debris:AddItem(particleEmitter, 3) -- Automatically remove particles after 3 seconds
-        end
-        
-        shadow.Equipped:Connect(function()
-            print("Equipped the shadow tool")
-            setupCrucifix(shadow)
-            game.Players.LocalPlayer:SetAttribute("Hidden", true)
-            toolActive = true
-        
-            -- Create a listener for tapping/clicking objects
-            local function onInputBegan(input, gameProcessed)
-                if gameProcessed then return end
-        
-                if toolActive and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-                    local mouse = Plr:GetMouse()
-                    if mouse.Target then -- Check if the mouse or touch is pointing at something
-                        print("Tapped/Clicked on: ", mouse.Target.Name)
-                        crucifyObject(mouse.Target) -- Apply crucifix effect
-                    else
-                        print("No valid target tapped/clicked")
-                    end
-                end
-            end
-        
-            UserInputService.InputBegan:Connect(onInputBegan)
-        end)
-        
-        shadow.Unequipped:Connect(function()
-            print("Unequipped the shadow tool")
-            game.Players.LocalPlayer:SetAttribute("Hidden", false)
-            RightArm.Name = "RightUpperArm"
-            LeftArm.Name = "LeftUpperArm"
-        
-            RightArm.RightShoulder.C1 = RightC1
-            LeftArm.LeftShoulder.C1 = LeftC1
-            print("Reset arm names and positions")
-            toolActive = false
-        end)
-        
-    end,
- })
+
 
 
 
@@ -731,10 +863,27 @@ end
 function check_for_a60_moving()
     local modelsFound = false
     for _, obj in ipairs(workspace:GetChildren()) do
-        if obj:IsA("Model") and obj.Name == "AmbushMoving" and not notifiedModels[obj] then
+        if obj:IsA("Model") and obj.Name == "A60" and not notifiedModels[obj] then
             -- Trigger notification
-            create_notification("Entity!", "Ambush has spawned! Hide quickly!", 5, "alert-circle")
-            print("ambush")
+            create_notification("Entity!", "A60 has spawned! Hide quickly!", 5, "alert-circle")
+            print("a60")
+            notifiedModels[obj] = true
+            modelsFound = true
+        end
+    end
+    -- Optional: Log a message if no models are found
+    if not modelsFound then
+       
+    end
+end
+
+function check_for_a120_moving()
+    local modelsFound = false
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == "A120" and not notifiedModels[obj] then
+            -- Trigger notification
+            create_notification("Entity!", "A120 has spawned! Hide quickly!", 5, "alert-circle")
+            print("a120")
             notifiedModels[obj] = true
             modelsFound = true
         end
@@ -790,6 +939,8 @@ while true do
     check_for_rush_moving()
     check_for_seek_moving()
     check_for_ambush_moving()
+    check_for_a60_moving()
+    check_for_a120_moving()
     check_for_eyes()
     end
     if thirdPerson == true and thirdPersonEverTriggerd == true then
@@ -818,6 +969,10 @@ while true do
 
     elseif seekExists == false then
         setSpeed(game.Players.LocalPlayer, 15)
+    end
+
+    if Godmode == true then
+        godmode_tick()
     end
     task.wait(0.2)
 end
