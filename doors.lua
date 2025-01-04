@@ -766,6 +766,7 @@ function check_for_eyes()
     end
 end
 
+
 while true do
     if entitynotify == true then
     check_for_rush_moving()
