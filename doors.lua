@@ -553,6 +553,11 @@ end
     Flag = "shownotificationsforsuccessToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
    shownotificationsforsuccess = Value
+   if Value == true then
+    displayDoorsMessage("Show success messages: ON", 1500)
+   else
+    displayDoorsMessage("Show success messages: OFF", 1500)
+   end
     end,
  })
 
@@ -562,6 +567,11 @@ end
     Flag = "doPingSafetyToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
    doPingDetectionSetting = Value
+   if Value == true then
+    displayDoorsMessage("Detect Bad Wifi: ON", 1500)
+   else
+    displayDoorsMessage("Detect Bad Wifi: OFF", 1500)
+   end
     end,
  })
 
