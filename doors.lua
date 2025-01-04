@@ -5,11 +5,30 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local useDoorsNotifcations = false
 
+-- Local mainUI
+
 local function Notify(options)
     assert(typeof(options) == "table", "Expected a table as options argument but got " .. typeof(options))
 
-    local mainUI = mainUI or shared.PlayerGui:WaitForChild("MainUI", 2.5)
-    if not mainUI then return end
+    local playerGui = shared.PlayerGui
+    local mainUI = playerGui and playerGui:FindFirstChild("MainUI")
+
+    if not mainUI then
+        mainUI = Instance.new("ScreenGui")
+        mainUI.Name = "MainUI"
+        mainUI.Parent = playerGui or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+        local achievementsHolder = Instance.new("Frame")
+        achievementsHolder.Name = "AchievementsHolder"
+        achievementsHolder.Size = UDim2.new(1, 0, 1, 0)
+        achievementsHolder.BackgroundTransparency = 1
+        achievementsHolder.Parent = mainUI
+
+        local templateAchievement = Instance.new("Frame")
+        templateAchievement.Name = "Achievement"
+        templateAchievement.Visible = false
+        templateAchievement.Parent = achievementsHolder
+    end
 
     local params = shared.Script.Functions.EnforceTypes(options, {
         Title = "No Title",
@@ -104,6 +123,7 @@ Doors = {
     Alert = Alert,
     Warn = Warn
 }
+
 
 
 
