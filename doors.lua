@@ -1,4 +1,112 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+
+-- Local mainUI
+
+local useDoorsNotifcations = false
+
+local function Notify(options)
+    assert(typeof(options) == "table", "Expected a table as options argument but got " .. typeof(options))
+
+    local mainUI = mainUI or shared.PlayerGui:WaitForChild("MainUI", 2.5)
+    if not mainUI then return end
+
+    local params = shared.Script.Functions.EnforceTypes(options, {
+        Title = "No Title",
+        Description = "No Text",
+        Reason = "",
+        NotificationType = "NOTIFICATION",
+        Image = "6023426923",
+        Color = nil,
+        Time = nil,
+        TweenDuration = 0.8
+    })
+
+    local achievement = mainUI.AchievementsHolder.Achievement:Clone()
+    achievement.Size = UDim2.new(0, 0, 0, 0)
+    achievement.Frame.Position = UDim2.new(1.1, 0, 0, 0)
+    achievement.Name = "LiveAchievement"
+    achievement.Visible = true
+
+    local frame = achievement.Frame
+    frame.TextLabel.Text = params.NotificationType
+
+    if params.Color then
+        frame.TextLabel.TextColor3 = params.Color
+        frame.UIStroke.Color = params.Color
+        frame.Glow.ImageColor3 = params.Color
+    end
+
+    frame.Details.Desc.Text = tostring(params.Description)
+    frame.Details.Title.Text = tostring(params.Title)
+    frame.Details.Reason.Text = tostring(params.Reason or "")
+
+    if params.Image:match("rbxthumb://") or params.Image:match("rbxassetid://") then
+        frame.ImageLabel.Image = tostring(params.Image or "rbxassetid://0")
+    else
+        frame.ImageLabel.Image = "rbxassetid://" .. tostring(params.Image or "0")
+    end
+
+    achievement.Parent = mainUI.AchievementsHolder
+    achievement.Sound.SoundId = "rbxassetid://10469938989"
+    achievement.Sound.Volume = 1
+
+    task.spawn(function()
+        achievement:TweenSize(UDim2.new(1, 0, 0.2, 0), "In", "Quad", params.TweenDuration, true)
+        task.wait(0.8)
+
+        frame:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.5, true)
+        shared.TweenService:Create(frame.Glow, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            ImageTransparency = 1
+        }):Play()
+
+        local waitTime = params.Time
+        if typeof(waitTime) == "number" then
+            task.wait(waitTime)
+        elseif typeof(waitTime) == "Instance" then
+            waitTime.Destroying:Wait()
+        else
+            task.wait(5)
+        end
+
+        frame:TweenPosition(UDim2.new(1.1, 0, 0, 0), "In", "Quad", 0.5, true)
+        task.wait(0.5)
+        achievement:TweenSize(UDim2.new(1, 0, -0.1, 0), "InOut", "Quad", 0.5, true)
+        task.wait(0.5)
+        achievement:Destroy()
+    end)
+end
+
+local function SimpleNotify(title, description, image)
+    Notify({
+        Title = title,
+        Description = description,
+        Image = image
+    })
+end
+
+local function Alert(options)
+    assert(typeof(options) == "table", "Expected a table as options argument but got " .. typeof(options))
+    options.NotificationType = "WARNING"
+    options.Color = Color3.new(1, 0, 0)
+    options.TweenDuration = 0.3
+    Notify(options)
+end
+
+local function Warn(options)
+    Alert(options)
+end
+
+-- Expose as Doors functions
+Doors = {
+    Notify = Notify,
+    SimpleNotify = SimpleNotify,
+    Alert = Alert,
+    Warn = Warn
+}
+
+
+
 local Window = Rayfield:CreateWindow({
     Name = "P6auls Doors Hub",
     Icon = "skull", -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -368,6 +476,15 @@ end
     end,
  })
 
+ local useDoorsNoticationsToggle = SettingsTab:CreateToggle({
+    Name = "Use Doors Style for Notications",
+    CurrentValue = false,
+    Flag = "useDoorsNoticationsToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+   useDoorsNotifcations = Value
+    end,
+ })
+
 
 
  local knobstogive = 0
@@ -389,7 +506,11 @@ end
     Callback = function()
    game.Players.LocalPlayer.Gold.Value += knobstogive
    if shownotificationsforsuccess == true then
+    if useDoorsNotifcations == false then
    create_notification("Success", "We gave you your gold!", 3, "badge-alert")
+    else
+        SimpleNotify("Success","We gave you your gold!","3128134660")
+    end
    end
     end,
  })
@@ -534,6 +655,8 @@ end
         local RightC1 = RightArm.RightShoulder.C1
         local LeftC1 = LeftArm.LeftShoulder.C1
         
+        local toolActive = false
+        
         local function setupCrucifix(tool)
             print("Setting up crucifix tool")
             RightArm.Name = "R_Arm"
@@ -594,12 +717,13 @@ end
             print("Equipped the shadow tool")
             setupCrucifix(shadow)
             game.Players.LocalPlayer:SetAttribute("Hidden", true)
+            toolActive = true
         
             -- Create a listener for tapping/clicking objects
             local function onInputBegan(input, gameProcessed)
                 if gameProcessed then return end
         
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if toolActive and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
                     local mouse = Plr:GetMouse()
                     if mouse.Target then -- Check if the mouse or touch is pointing at something
                         print("Tapped/Clicked on: ", mouse.Target.Name)
@@ -622,6 +746,7 @@ end
             RightArm.RightShoulder.C1 = RightC1
             LeftArm.LeftShoulder.C1 = LeftC1
             print("Reset arm names and positions")
+            toolActive = false
         end)
         
     end,
@@ -653,6 +778,23 @@ end
 end
 
 function check_for_ambush_moving()
+    local modelsFound = false
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == "AmbushMoving" and not notifiedModels[obj] then
+            -- Trigger notification
+            create_notification("Entity!", "Ambush has spawned! Hide quickly!", 5, "alert-circle")
+            print("ambush")
+            notifiedModels[obj] = true
+            modelsFound = true
+        end
+    end
+    -- Optional: Log a message if no models are found
+    if not modelsFound then
+       
+    end
+end
+
+function check_for_a60_moving()
     local modelsFound = false
     for _, obj in ipairs(workspace:GetChildren()) do
         if obj:IsA("Model") and obj.Name == "AmbushMoving" and not notifiedModels[obj] then
