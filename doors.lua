@@ -73,8 +73,12 @@ local originalPosition = nil
 local ping = player:GetNetworkPing()
 
 local function godmode_tick()
-    local TELEPORT_OFFSET = 50
-    local HIGH_PING_OFFSET = 100  -- Higher teleport offset if ping > 200
+    local TELEPORT_MIN_OFFSET = 50
+    local TELEPORT_MAX_OFFSET = 100
+    local SAVE_INTERVAL = 5  -- Save the position every 10 runs
+
+    local runCount = runCount or 0
+    local savedPosition = savedPosition or nil  -- Save the player's position every 10 runs
 
     local player = game:GetService("Players").LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
@@ -82,10 +86,16 @@ local function godmode_tick()
     if not humanoidRootPart then return end
 
     local currentPosition = humanoidRootPart.Position
-    local originalPosition = originalPosition or currentPosition  -- Store original position if not set
-
     local ping = player:GetNetworkPing()  -- Get player's network ping
-    local teleportOffset = ping > 200 and HIGH_PING_OFFSET or TELEPORT_OFFSET  -- Set higher offset if ping is over 200
+
+    -- Increment the run count each time the function is called
+    runCount = runCount + 1
+
+    -- Every 10th run, save the player's current position
+    if runCount % SAVE_INTERVAL == 0 then
+        savedPosition = currentPosition
+        print("Position saved:", savedPosition)
+    end
 
     -- Check for dangerous models and teleport the player
     local workspace = game:GetService("Workspace")
@@ -99,20 +109,25 @@ local function godmode_tick()
     local dangerDetected = false
 
     for name, entity in pairs(entities) do
-        if entity then
+        if entity and savedPosition then
             print("Entity detected:", name)
-            local newPosition = currentPosition + Vector3.new(0, teleportOffset, 0)
+
+            -- Generate a random teleport offset between 50 and 100
+            local teleportOffset = math.random(TELEPORT_MIN_OFFSET, TELEPORT_MAX_OFFSET)
+            local newPosition = savedPosition + Vector3.new(0, teleportOffset, 0)
             humanoidRootPart.CFrame = CFrame.new(newPosition)
             print("Teleported due to entity:", name)
+
             dangerDetected = true
             break
         end
     end
 
-    -- If no danger detected, return the player to the original position
-    if not dangerDetected and originalPosition then
-        humanoidRootPart.CFrame = CFrame.new(originalPosition)
-        originalPosition = nil
+    -- If no danger detected and savedPosition exists, reset the player to the saved position
+    if not dangerDetected and savedPosition then
+        humanoidRootPart.CFrame = CFrame.new(savedPosition)
+        print("No danger detected, returning to saved position.")
+        savedPosition = nil  -- Clear the saved position after teleporting back down
     end
 end
 
