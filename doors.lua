@@ -639,7 +639,7 @@ end
 
 local DividerPro1 = PremiumTab:CreateDivider()
 
-local GodModeToggle = Tab:CreateToggle({
+local GodModeToggle = PremiumTab:CreateToggle({
     Name = "Godmode",
     CurrentValue = false,
     Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
