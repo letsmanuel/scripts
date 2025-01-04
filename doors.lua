@@ -1,132 +1,5 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-
--- Local mainUI
-
-local useDoorsNotifcations = false
-
--- Local mainUI
-
-local function Notify(options)
-    assert(typeof(options) == "table", "Expected a table as options argument but got " .. typeof(options))
-
-    local playerGui = shared.PlayerGui
-    local mainUI = playerGui and playerGui:FindFirstChild("MainUI")
-
-    if not mainUI then
-        mainUI = Instance.new("ScreenGui")
-        mainUI.Name = "MainUI"
-        mainUI.Parent = playerGui or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-
-        local achievementsHolder = Instance.new("Frame")
-        achievementsHolder.Name = "AchievementsHolder"
-        achievementsHolder.Size = UDim2.new(1, 0, 1, 0)
-        achievementsHolder.BackgroundTransparency = 1
-        achievementsHolder.Parent = mainUI
-
-        local templateAchievement = Instance.new("Frame")
-        templateAchievement.Name = "Achievement"
-        templateAchievement.Visible = false
-        templateAchievement.Parent = achievementsHolder
-    end
-
-    local params = shared.Script.Functions.EnforceTypes(options, {
-        Title = "No Title",
-        Description = "No Text",
-        Reason = "",
-        NotificationType = "NOTIFICATION",
-        Image = "6023426923",
-        Color = nil,
-        Time = nil,
-        TweenDuration = 0.8
-    })
-
-    local achievement = mainUI.AchievementsHolder.Achievement:Clone()
-    achievement.Size = UDim2.new(0, 0, 0, 0)
-    achievement.Frame.Position = UDim2.new(1.1, 0, 0, 0)
-    achievement.Name = "LiveAchievement"
-    achievement.Visible = true
-
-    local frame = achievement.Frame
-    frame.TextLabel.Text = params.NotificationType
-
-    if params.Color then
-        frame.TextLabel.TextColor3 = params.Color
-        frame.UIStroke.Color = params.Color
-        frame.Glow.ImageColor3 = params.Color
-    end
-
-    frame.Details.Desc.Text = tostring(params.Description)
-    frame.Details.Title.Text = tostring(params.Title)
-    frame.Details.Reason.Text = tostring(params.Reason or "")
-
-    if params.Image:match("rbxthumb://") or params.Image:match("rbxassetid://") then
-        frame.ImageLabel.Image = tostring(params.Image or "rbxassetid://0")
-    else
-        frame.ImageLabel.Image = "rbxassetid://" .. tostring(params.Image or "0")
-    end
-
-    achievement.Parent = mainUI.AchievementsHolder
-    achievement.Sound.SoundId = "rbxassetid://10469938989"
-    achievement.Sound.Volume = 1
-
-    task.spawn(function()
-        achievement:TweenSize(UDim2.new(1, 0, 0.2, 0), "In", "Quad", params.TweenDuration, true)
-        task.wait(0.8)
-
-        frame:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.5, true)
-        shared.TweenService:Create(frame.Glow, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            ImageTransparency = 1
-        }):Play()
-
-        local waitTime = params.Time
-        if typeof(waitTime) == "number" then
-            task.wait(waitTime)
-        elseif typeof(waitTime) == "Instance" then
-            waitTime.Destroying:Wait()
-        else
-            task.wait(5)
-        end
-
-        frame:TweenPosition(UDim2.new(1.1, 0, 0, 0), "In", "Quad", 0.5, true)
-        task.wait(0.5)
-        achievement:TweenSize(UDim2.new(1, 0, -0.1, 0), "InOut", "Quad", 0.5, true)
-        task.wait(0.5)
-        achievement:Destroy()
-    end)
-end
-
-local function SimpleNotify(title, description, image)
-    Notify({
-        Title = title,
-        Description = description,
-        Image = image
-    })
-end
-
-local function Alert(options)
-    assert(typeof(options) == "table", "Expected a table as options argument but got " .. typeof(options))
-    options.NotificationType = "WARNING"
-    options.Color = Color3.new(1, 0, 0)
-    options.TweenDuration = 0.3
-    Notify(options)
-end
-
-local function Warn(options)
-    Alert(options)
-end
-
--- Expose as Doors functions
-Doors = {
-    Notify = Notify,
-    SimpleNotify = SimpleNotify,
-    Alert = Alert,
-    Warn = Warn
-}
-
-
-
-
 local Window = Rayfield:CreateWindow({
     Name = "P6auls Doors Hub",
     Icon = "skull", -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -477,6 +350,8 @@ end
 
  local ExploitTab = Window:CreateTab("Instant Exploit", "badge-plus") -- Title, Image
 
+ local PremiumTab = Window:CreateTab("Premium Features", "coins") -- Title, Image
+
  local SettingsTab = Window:CreateTab("Settings", "lock-open") -- Title, Image
 
  local shownotificationsforsuccess = true
@@ -496,14 +371,37 @@ end
     end,
  })
 
- local useDoorsNoticationsToggle = SettingsTab:CreateToggle({
-    Name = "Use Doors Style for Notications",
-    CurrentValue = false,
-    Flag = "useDoorsNoticationsToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Value)
-   useDoorsNotifcations = Value
+ local getFragmentButton = SettingsTab:CreateButton({
+    Name = "Summon Glitch Fragment (Run before opening a door!)",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "Do not move!",
+            Content = "Starting in 3 seconds.",
+            Duration = 3,
+            Image = "coins",
+         })
+         wait(3)
+         Rayfield:Notify({
+            Title = "One Moment...",
+            Content = "Summoning the Glitch Fragment...",
+            Duration = 25,
+            Image = "coins",
+         })
+         for i = 1, teleportCount do
+          
+            player.Character:SetPrimaryPartCFrame(CFrame.new(0, -5000, 0))  -- You can adjust the Y value for deeper teleportation
+            wait(teleportDelay)  -- Wait for the specified delay before the next teleport
+        end
+        Rayfield:Notify({
+            Title = "Finished.",
+            Content = "The Fragment is now spawned.",
+            Duration = 5,
+            Image = "coins",
+         })
     end,
  })
+
+
 
 
 
@@ -526,11 +424,9 @@ end
     Callback = function()
    game.Players.LocalPlayer.Gold.Value += knobstogive
    if shownotificationsforsuccess == true then
-    if useDoorsNotifcations == false then
+
    create_notification("Success", "We gave you your gold!", 3, "badge-alert")
-    else
-        SimpleNotify("Success","We gave you your gold!","3128134660")
-    end
+
    end
     end,
  })
