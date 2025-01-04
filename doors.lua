@@ -525,6 +525,7 @@ end
         local Players = game:GetService("Players")
         local TweenService = game:GetService("TweenService")
         local Debris = game:GetService("Debris")
+        local UserInputService = game:GetService("UserInputService")
         local Plr = Players.LocalPlayer
         local Char = Plr.Character or Plr.CharacterAdded:Wait()
         local Hum = Char:WaitForChild("Humanoid")
@@ -594,19 +595,22 @@ end
             setupCrucifix(shadow)
             game.Players.LocalPlayer:SetAttribute("Hidden", true)
         
-            -- Create a mouse listener for clicking objects
-            local mouse = Plr:GetMouse()
-            local function onClick()
-                if mouse.Target then -- Check if the mouse is pointing at something
-                    print("Clicked on: ", mouse.Target.Name)
-                    crucifyObject(mouse.Target) -- Apply crucifix effect
-                else
-                    print("No valid target clicked")
+            -- Create a listener for tapping/clicking objects
+            local function onInputBegan(input, gameProcessed)
+                if gameProcessed then return end
+        
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    local mouse = Plr:GetMouse()
+                    if mouse.Target then -- Check if the mouse or touch is pointing at something
+                        print("Tapped/Clicked on: ", mouse.Target.Name)
+                        crucifyObject(mouse.Target) -- Apply crucifix effect
+                    else
+                        print("No valid target tapped/clicked")
+                    end
                 end
             end
         
-            -- Connect the listener to the mouse's button click
-            mouse.Button1Down:Connect(onClick)
+            UserInputService.InputBegan:Connect(onInputBegan)
         end)
         
         shadow.Unequipped:Connect(function()
@@ -620,7 +624,6 @@ end
             print("Reset arm names and positions")
         end)
         
-          
     end,
  })
 
