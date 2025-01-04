@@ -7,7 +7,7 @@ local MissingOutOn = [[
 * God Mode
 ]]
 
-local hasPremium = player:HasGamePass(13600173502)
+local hasPremium = game.Players.LocalPlayer:HasGamePass(13600173502)
 if hasPremium then
    VIP = true
 else
