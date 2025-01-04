@@ -1,32 +1,32 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local function displayDoorsMessage(message, durationInMilliseconds)
-    -- Convert milliseconds to seconds
+  
     local durationInSeconds = durationInMilliseconds / 1000
 
-    -- Get the LocalPlayer and the PlayerGui
+    
     local player = game.Players.LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
     
-    -- Try to find the MainUI and MainFrame
+  
     local mainUI = playerGui:WaitForChild("MainUI")
     local mainFrame = mainUI:WaitForChild("MainFrame")
     
-    -- Try to find the Caption
+   
     local caption = mainFrame:FindFirstChild("Caption")
     if caption then
-        -- Set the Caption text
+       
         caption.Text = message
         caption.Visible = true
         
-        -- Tween transparency in (fade in)
+       
         local tweenService = game:GetService("TweenService")
         local tweenInfoIn = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
         local goalIn = {TextTransparency = 0}
         local tweenIn = tweenService:Create(caption, tweenInfoIn, goalIn)
         tweenIn:Play()
         
-        -- Play the sound
+      
         local sound = Instance.new("Sound")
         sound.SoundId = "rbxassetid://3848738542"
         sound.Parent = playerGui
