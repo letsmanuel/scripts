@@ -54,6 +54,10 @@ end
 
  local ExploitsSection = MainTab:CreateSection("Exploits")
 
+ local headlight = false
+ local headlightBrightness = 2
+ local headlightRange = 16
+
  local BlackKingLaunchButton = MainTab:CreateButton({
     Name = "Bobhub",
     Callback = function()
@@ -82,6 +86,40 @@ end
     end,
  })
 
+ local function create_head_light(player)
+    if player and player.Character and player.Character:FindFirstChild("Head") then
+        local head = player.Character.Head
+
+        if head:FindFirstChild("HeadLight") then
+            warn("Head light already exists!")
+            return
+        end
+
+        local light = Instance.new("PointLight")
+        light.Name = "HeadLight"
+        light.Parent = head
+        light.Range = headlightRange -- Adjust the range of the light
+        light.Brightness = headlightBrightness -- Adjust the brightness of the light
+        light.Color = Color3.new(1, 1, 1) -- White light
+        print("Head light created!")
+    else
+    end
+end
+
+local function delete_head_light(player)
+    if player and player.Character and player.Character:FindFirstChild("Head") then
+        local head = player.Character.Head
+
+        local light = head:FindFirstChild("HeadLight")
+        if light then
+            light:Destroy()
+        else
+        end
+    else
+        warn("Player does not have a valid character or head.")
+    end
+end
+
  local ExploitTab = Window:CreateTab("Instant Exploit", "badge-plus") -- Title, Image
 
  local SettingsTab = Window:CreateTab("Settings", "lock-open") -- Title, Image
@@ -89,6 +127,7 @@ end
  local shownotificationsforsuccess = true
  local entitynotify = false
  local thirdPerson = false
+ local notifiedthirdPerson = 0
 
  local shownotificationsforsuccessToggle = SettingsTab:CreateToggle({
     Name = "Show success messages",
@@ -145,6 +184,48 @@ end
     end,
  })
 
+ local Divider1 = ExploitTab:CreateDivider()
+
+ local headLightPowerSlider = ExploitTab:CreateSlider({
+    Name = "HeadLight Power",
+    Range = {10, 100},
+    Increment = 1,
+    Suffix = "Power",
+    CurrentValue = 16,
+    Flag = "headLightPowerSlider", 
+    Callback = function(Value)
+    headLightPowerSlider = Value
+    delete_head_light(game.Players.LocalPlayer)
+    create_head_light(game.Players.LocalPlayer)
+    end,
+ })
+
+ local headLightRangeSlider = ExploitTab:CreateSlider({
+    Name = "HeadLight Range",
+    Range = {10, 100},
+    Increment = 1,
+    Suffix = "Range",
+    CurrentValue = 16,
+    Flag = "headLightRangeSlider", 
+    Callback = function(Value)
+    headlightRange = Value
+    delete_head_light(game.Players.LocalPlayer)
+    create_head_light(game.Players.LocalPlayer)
+    end,
+ })
+
+ local headLightToggle = ExploitTab:CreateToggle({
+    Name = "Headlight",
+    CurrentValue = false,
+    Flag = "headLightToggle", 
+    Callback = function(Value)
+    if headlight == false then
+        delete_head_light(game.Players.LocalPlayer)
+    else
+        create_head_light(game.Players.LocalPlayer)
+    end
+    end,
+ })
 
 
 
@@ -216,12 +297,14 @@ while true do
     end
     if thirdPerson == true then
         game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
-        if shownotificationsforsuccess == true then
+        if shownotificationsforsuccess == true and notifiedthirdPerson == 0 then
+            notifiedthirdPerson = 1
             create_notification("Success", "You are now in Third Person. If not, try to toggle again!", 3, "badge-alert")
-            end
+        end
     else
         game.Players.LocalPlayer.CameraMode = Enum.CameraMode.LockFirstPerson
-        if shownotificationsforsuccess == true then
+        if shownotificationsforsuccess == true and notifiedthirdPerson ==  1 then
+            notifiedthirdPerson = 0
             create_notification("Success", "You are now in First Person. If not, try to toggle again!", 3, "badge-alert")
         end
     end
