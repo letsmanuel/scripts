@@ -1,6 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local VIP
+
 local MissingOutOn = [[
 * Spawn a Glitch Fragment
 * Cruzify everything (Mobile Support)
