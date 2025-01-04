@@ -118,7 +118,7 @@ local function godmode_tick()
             end
     
             -- Calculate the new position (50 studs above the original position)
-            local newPosition = originalPosition + Vector3.new(0, TELEPORT_OFFSET, 0)
+            local newPosition = originalPosition + Vector3.new(0, 50, 0)
     
             -- Teleport the player to the new position
             humanoidRootPart.CFrame = CFrame.new(newPosition)
@@ -146,6 +146,7 @@ local function godmode_crash()
         Duration = 20,
         Image = "badge-plus",
     })
+    GodModeToggle:Set(false)
 end
 
 local function godmode_tick_handle()
