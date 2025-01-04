@@ -519,40 +519,108 @@ end
  local CruzifixGiverButton = ExploitTab:CreateButton({
     Name = "Give yourself a cruzifix",
     Callback = function()
-  		-- The function that takes place when the button is pressed
-          local shadow=game:GetObjects("rbxassetid://11498423088")[1]
-          shadow.Parent = game.Players.LocalPlayer.Backpack
-          local Players = game:GetService("Players")
-          local Plr = Players.LocalPlayer
-          local Char = Plr.Character or Plr.CharacterAdded:Wait()
-          local Hum = Char:WaitForChild("Humanoid")
-          local RightArm = Char:WaitForChild("RightUpperArm")
-          local LeftArm = Char:WaitForChild("LeftUpperArm")
-          local RightC1 = RightArm.RightShoulder.C1
-          local LeftC1 = LeftArm.LeftShoulder.C1
-                  local function setupCrucifix(tool)
-                  RightArm.Name = "R_Arm"
-                  LeftArm.Name = "L_Arm"
-                  
-                  RightArm.RightShoulder.C1 = RightC1 * CFrame.Angles(math.rad(-90), math.rad(-15), 0)
-                  LeftArm.LeftShoulder.C1 = LeftC1 * CFrame.new(-0.2, -0.3, -0.5) * CFrame.Angles(math.rad(-125), math.rad(25), math.rad(25))
-                  for _, v in next, Hum:GetPlayingAnimationTracks() do
-                      v:Stop()
-                  end
-                  end
-          shadow.Equipped:Connect(function()
-          setupCrucifix(shadow)
-          game.Players.LocalPlayer:SetAttribute("Hidden", true)
-          end)
-           
-          shadow.Unequipped:Connect(function()
-              game.Players.LocalPlayer:SetAttribute("Hidden", false)
-                  RightArm.Name = "RightUpperArm"
-                  LeftArm.Name = "LeftUpperArm"
-                  
-                  RightArm.RightShoulder.C1 = RightC1
-                  LeftArm.LeftShoulder.C1 = LeftC1
-          end)
+        local shadow = game:GetObjects("rbxassetid://11498423088")[1]
+        shadow.Parent = game.Players.LocalPlayer.Backpack
+        
+        local Players = game:GetService("Players")
+        local TweenService = game:GetService("TweenService")
+        local Debris = game:GetService("Debris")
+        local Plr = Players.LocalPlayer
+        local Char = Plr.Character or Plr.CharacterAdded:Wait()
+        local Hum = Char:WaitForChild("Humanoid")
+        local RightArm = Char:WaitForChild("RightUpperArm")
+        local LeftArm = Char:WaitForChild("LeftUpperArm")
+        local RightC1 = RightArm.RightShoulder.C1
+        local LeftC1 = LeftArm.LeftShoulder.C1
+        
+        local function setupCrucifix(tool)
+            print("Setting up crucifix tool")
+            RightArm.Name = "R_Arm"
+            LeftArm.Name = "L_Arm"
+        
+            RightArm.RightShoulder.C1 = RightC1 * CFrame.Angles(math.rad(-90), math.rad(-15), 0)
+            LeftArm.LeftShoulder.C1 = LeftC1 * CFrame.new(-0.2, -0.3, -0.5) * CFrame.Angles(math.rad(-125), math.rad(25), math.rad(25))
+        
+            print("Stopped current animations")
+            for _, v in next, Hum:GetPlayingAnimationTracks() do
+                v:Stop()
+            end
+        end
+        
+        local function crucifyObject(target)
+            if not target:IsA("BasePart") and not target:IsA("Model") then 
+                print("Invalid target clicked: ", target.Name)
+                return 
+            end
+        
+            print("Crucifying object: ", target.Name)
+        
+            -- Add visual effects
+            local glow = Instance.new("SelectionBox")
+            glow.Adornee = target
+            glow.LineThickness = 0.05
+            glow.Color3 = Color3.fromRGB(0, 255, 255)
+            glow.Parent = target
+            print("Added glow effect to: ", target.Name)
+        
+            local particleEmitter = Instance.new("ParticleEmitter")
+            particleEmitter.Texture = "rbxassetid://258128463" -- Example texture for a holy effect
+            particleEmitter.Rate = 20
+            particleEmitter.Lifetime = NumberRange.new(1)
+            particleEmitter.Speed = NumberRange.new(0.5, 1)
+            particleEmitter.Parent = target
+            print("Added particle effect to: ", target.Name)
+        
+            -- Animate object flying into the void
+            local targetPosition = target.Position - Vector3.new(0, 100, 0)
+            local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Linear)
+            local tween = TweenService:Create(target, tweenInfo, {Position = targetPosition})
+        
+            print("Started tween animation for: ", target.Name)
+            tween:Play()
+            
+            -- Cleanup after effect
+            tween.Completed:Connect(function()
+                print("Object reached void and is being destroyed: ", target.Name)
+                target:Destroy()
+            end)
+        
+            Debris:AddItem(glow, 3) -- Automatically remove the glow after 3 seconds
+            Debris:AddItem(particleEmitter, 3) -- Automatically remove particles after 3 seconds
+        end
+        
+        shadow.Equipped:Connect(function()
+            print("Equipped the shadow tool")
+            setupCrucifix(shadow)
+            game.Players.LocalPlayer:SetAttribute("Hidden", true)
+        
+            -- Create a mouse listener for clicking objects
+            local mouse = Plr:GetMouse()
+            local function onClick()
+                if mouse.Target then -- Check if the mouse is pointing at something
+                    print("Clicked on: ", mouse.Target.Name)
+                    crucifyObject(mouse.Target) -- Apply crucifix effect
+                else
+                    print("No valid target clicked")
+                end
+            end
+        
+            -- Connect the listener to the mouse's button click
+            mouse.Button1Down:Connect(onClick)
+        end)
+        
+        shadow.Unequipped:Connect(function()
+            print("Unequipped the shadow tool")
+            game.Players.LocalPlayer:SetAttribute("Hidden", false)
+            RightArm.Name = "RightUpperArm"
+            LeftArm.Name = "LeftUpperArm"
+        
+            RightArm.RightShoulder.C1 = RightC1
+            LeftArm.LeftShoulder.C1 = LeftC1
+            print("Reset arm names and positions")
+        end)
+        
+          
     end,
  })
 
