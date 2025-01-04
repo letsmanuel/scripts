@@ -86,58 +86,63 @@ end
     end,
  })
 
-local espObjects = {}
+ local espObjects = {}
 
-local function create_esp(object)
-    if not object:IsA("BasePart") then return end
+ -- Function to create an ESP highlight
+ local function create_esp(object)
+     if not object:IsA("BasePart") then return end
+ 
+     local adornment = Instance.new("BoxHandleAdornment")
+     adornment.Name = "ESPAdornment"
+     adornment.Adornee = object
+     adornment.AlwaysOnTop = true
+     adornment.ZIndex = 10
+     adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
+     adornment.Color3 = Color3.new(1, 0, 0) -- Red color
+     adornment.Transparency = 0.5
+     adornment.Parent = object
+ 
+     table.insert(espObjects, adornment)
+ end
+ 
+ -- Function to remove all ESP highlights
+ local function remove_esp()
+     for _, esp in ipairs(espObjects) do
+         if esp and esp.Parent then
+             esp:Destroy()
+         end
+     end
+     espObjects = {}
+ end
+ 
+ -- Function to check recursively and apply ESP
+ local function check_and_highlight(object)
+     if object:IsA("Model") then
+         -- Handle KeyObtain
+         if object.Name == "KeyObtain" then
+             local hitbox = object:FindFirstChild("Hitbox")
+             if hitbox and hitbox:IsA("BasePart") then
+                 local key = hitbox:FindFirstChild("Key")
+                 if key and key:IsA("BasePart") then
+                     create_esp(key)
+                 end
+             end
+         -- Handle other models
+         elseif object.Name == "LiveHintBook" or object.Name == "Wardrobe" or object.Name == "Door" or object.Name == "Dresser" then
+             create_esp(object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart"))
+         end
+     end
+ 
+     -- Recursively check children
+     for _, child in ipairs(object:GetChildren()) do
+         check_and_highlight(child)
+     end
+ end
+ 
 
-    local adornment = Instance.new("BoxHandleAdornment")
-    adornment.Name = "ESPAdornment"
-    adornment.Adornee = object
-    adornment.AlwaysOnTop = true
-    adornment.ZIndex = 10
-    adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
-    adornment.Color3 = Color3.new(0, 1, 0) -- Red color
-    adornment.Transparency = 0.5
-    adornment.Parent = object
-
-    table.insert(espObjects, adornment)
-end
-
-local function remove_esp()
-    for _, esp in ipairs(espObjects) do
-        if esp and esp.Parent then
-            esp:Destroy()
-        end
-    end
-    espObjects = {}
-end
-
-local function toggle_esp_on()
-    local currentRooms = workspace:FindFirstChild("CurrentRooms")
-    if not currentRooms then
-        warn("CurrentRooms folder not found!")
-        return
-    end
-
-    for _, room in ipairs(currentRooms:GetChildren()) do
-        if room:IsA("Model") then
-            local assets = room:FindFirstChild("Assets")
-            if assets and assets:IsA("Folder") then
-                local keyObtain = assets:FindFirstChild("KeyObtain")
-                if keyObtain and keyObtain:IsA("Model") then
-                    local hitbox = keyObtain:FindFirstChild("Hitbox")
-                    if hitbox and hitbox:IsA("BasePart") then
-                        local key = hitbox:FindFirstChild("Key")
-                        if key and key:IsA("BasePart") then
-                            create_esp(key)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
+ local function toggle_esp_on()
+     check_and_highlight(workspace)
+ end
 
 
  local function create_head_light(player)
