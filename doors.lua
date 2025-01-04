@@ -57,6 +57,9 @@ end
  local headlight = false
  local headlightBrightness = 2
  local headlightRange = 16
+ local speedBoost = false
+ local speedBoostValue = 16
+ local speedBoostDuringSeek = false
 
  local BlackKingLaunchButton = MainTab:CreateButton({
     Name = "Bobhub",
@@ -301,6 +304,14 @@ end
 
 setupFullbright()
 
+local function setSpeed(player, speed)
+    local character = player.Character
+    if character and character:FindFirstChild("Humanoid") then
+        local humanoid = character:FindFirstChild("Humanoid")
+        humanoid.WalkSpeed = speed
+    end
+end
+
 
  local function create_head_light(player)
     if player and player.Character and player.Character:FindFirstChild("Head") then
@@ -345,6 +356,7 @@ end
  local thirdPerson = false
  local notifiedthirdPerson = 0
  local Esp = false
+ local seekExists = false
 
  local shownotificationsforsuccessToggle = SettingsTab:CreateToggle({
     Name = "Show success messages",
@@ -420,6 +432,38 @@ end
  })
 
  local Divider1 = ExploitTab:CreateDivider()
+
+ local MoveSpeedSlider = ExploitTab:CreateSlider({
+    Name = "Player Speed",
+    Range = {1, 60},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 16,
+    Flag = "MoveSpeedSlider", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        speedBoostValue = Value
+    end,
+ })
+
+ local MoveSpeedToggle = ExploitTab:CreateToggle({
+    Name = "Speed Hack",
+    CurrentValue = false,
+    Flag = "MoveSpeedToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        speedBoost = Value
+    end,
+ })
+
+ local MoveSpeedDuringSeekToggle = ExploitTab:CreateToggle({
+    Name = "Apply during Seek Chase",
+    CurrentValue = false,
+    Flag = "MoveSpeedDuringSeekToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        speedBoostDuringSeek = Value
+    end,
+ })
+
+ local Divider3 = ExploitTab:CreateDivider()
 
  local headLightPowerSlider = ExploitTab:CreateSlider({
     Name = "HeadLight Power",
@@ -519,15 +563,19 @@ function check_for_seek_moving()
         if obj:IsA("Model") and obj.Name == "SeekMovingNewClone" and not notifiedModels[obj] then
             -- Trigger notification
             create_notification("Entity!", "Seek has spawned! Run quickly!", 5, "alert-circle")
+            if speedBoostDuringSeek == false and speedBoost == true then
+                setSpeed(game.Players.LocalPlayer, 15)
+                create_notification("Warning!", "Due to your settings, SpeedBoost is temporarily disabled.", 6, "alert-circle")
+            end
             print("seek")
-            -- Mark this model as notified
+            seekExists = true
             notifiedModels[obj] = true
             modelsFound = true
         end
     end
     -- Optional: Log a message if no models are found
     if not modelsFound then
-       
+       seekExists = false
     end
 end
 
@@ -573,6 +621,15 @@ while true do
         toggle_esp_on()
     else
         remove_esp()
+    end
+    if speedBoost == true then
+
+        if seekExists == false or speedBoostDuringSeek == true then
+            setSpeed(game.Players.LocalPlayer, speedBoostValue)
+        end
+
+    elseif seekExists == false then
+        setSpeed(game.Players.LocalPlayer, 15)
     end
     task.wait(0.2)
 end
