@@ -86,6 +86,60 @@ end
     end,
  })
 
+local espObjects = {}
+
+local function create_esp(object)
+    if not object:IsA("BasePart") then return end
+
+    local adornment = Instance.new("BoxHandleAdornment")
+    adornment.Name = "ESPAdornment"
+    adornment.Adornee = object
+    adornment.AlwaysOnTop = true
+    adornment.ZIndex = 10
+    adornment.Size = object.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the object
+    adornment.Color3 = Color3.new(0, 1, 0) -- Red color
+    adornment.Transparency = 0.5
+    adornment.Parent = object
+
+    table.insert(espObjects, adornment)
+end
+
+local function remove_esp()
+    for _, esp in ipairs(espObjects) do
+        if esp and esp.Parent then
+            esp:Destroy()
+        end
+    end
+    espObjects = {}
+end
+
+local function toggle_esp_on()
+    local currentRooms = workspace:FindFirstChild("CurrentRooms")
+    if not currentRooms then
+        warn("CurrentRooms folder not found!")
+        return
+    end
+
+    for _, room in ipairs(currentRooms:GetChildren()) do
+        if room:IsA("Model") then
+            local assets = room:FindFirstChild("Assets")
+            if assets and assets:IsA("Folder") then
+                local keyObtain = assets:FindFirstChild("KeyObtain")
+                if keyObtain and keyObtain:IsA("Model") then
+                    local hitbox = keyObtain:FindFirstChild("Hitbox")
+                    if hitbox and hitbox:IsA("BasePart") then
+                        local key = hitbox:FindFirstChild("Key")
+                        if key and key:IsA("BasePart") then
+                            create_esp(key)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+
  local function create_head_light(player)
     if player and player.Character and player.Character:FindFirstChild("Head") then
         local head = player.Character.Head
@@ -128,6 +182,7 @@ end
  local entitynotify = false
  local thirdPerson = false
  local notifiedthirdPerson = 0
+ local Esp = false
 
  local shownotificationsforsuccessToggle = SettingsTab:CreateToggle({
     Name = "Show success messages",
@@ -181,6 +236,15 @@ end
     Flag = "thirdPersonToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
    thirdPerson = Value
+    end,
+ })
+
+ local EspToggle = ExploitTab:CreateToggle({
+    Name = "ESP",
+    CurrentValue = false,
+    Flag = "EspToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        Esp = Value
     end,
  })
 
@@ -307,6 +371,11 @@ while true do
             notifiedthirdPerson = 0
             create_notification("Success", "You are now in First Person. If not, try to toggle again!", 3, "badge-alert")
         end
+    end
+    if Esp == true then
+        toggle_esp_on()
+    else
+        remove_esp()
     end
     task.wait(0.2)
 end
