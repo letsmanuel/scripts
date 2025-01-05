@@ -165,6 +165,15 @@ local function godmode_tick()
 
     end
 
+    print(ONGROUNDSAFELY)
+    print(TELEPORTGODMODESTORAGE)
+    print(INAIR)
+    print(GODMODEDANGER)
+    print(godmodeA120)
+    print(godmodeA60)
+    print(godmodeAMBUSH)
+    print(godmodeRUSH)
+
 end
 
 local godmode_crash_reason = ""
@@ -172,7 +181,7 @@ local godmode_crash_reason = ""
 local function godmode_crash()
     Rayfield:Notify({
         Title = "Error",
-        Content = "Godmode had a Problem and we had to shut it down.",
+        Content = "Godmode has an Error. Turn it off!",
         Duration = 7,
         Image = "badge-plus",
     })
@@ -182,7 +191,6 @@ local function godmode_crash()
         Duration = 20,
         Image = "badge-plus",
     })
-    GodModeToggle:Set(false)
 end
 
 local function godmode_tick_handle()
