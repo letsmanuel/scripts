@@ -119,63 +119,52 @@ local originalPosition = nil
 
 local ping = player:GetNetworkPing()
 
+local TELEPORTGODMODESTORAGE
+local TELEPORTGODMODEENDPOINT
+
+-- humanoidRootPart.CFrame = CFrame.new(savedPosition)
+
 local function godmode_tick()
-    local TELEPORT_MIN_OFFSET = 50
-    local TELEPORT_MAX_OFFSET = 100
-    local SAVE_INTERVAL = 5  -- Save the position every 10 runs
+    local PLAYER = game.Players.LocalPlayer
+    local TRESHHOLD = 50
+    local MAXPING = 400
+    local godmodeA60 = workspace:FindFirstChild(A60) ~= nil
+    local godmodeA120 = workspace:FindFirstChild(A120) ~= nil
+    local godmodeRUSH = workspace:FindFirstChild(RushMoving) ~= nil
+    local godmodeAMBUSH = workspace:FindFirstChild(AmbushMoving) ~= nil
+    local GODMODEDANGER = false
+    local POSITION = PLAYER.Character.HumanoidRootPart.Position
+    local INAIR = false
+    local ONGROUNDSAFELY = true
+    
 
-    local runCount = runCount or 0
-    local savedPosition = savedPosition or nil  -- Save the player's position every 10 runs
-
-    local player = game:GetService("Players").LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
-
-    local currentPosition = humanoidRootPart.Position
-    local ping = player:GetNetworkPing()  -- Get player's network ping
-
-    -- Increment the run count each time the function is called
-    runCount = runCount + 1
-
-    -- Every 10th run, save the player's current position
-    if runCount % SAVE_INTERVAL == 0 then
-        savedPosition = currentPosition
-        print("Position saved:", savedPosition)
+    if godmodeA120 == true or godmodeA60 == true or godmodeAMBUSH == true or godmodeRUSH == true then
+        GODMODEDANGER = true
     end
 
-    -- Check for dangerous models and teleport the player
-    local workspace = game:GetService("Workspace")
-    local entities = {
-        RushMoving = workspace:FindFirstChild("RushMoving"),
-        AmbushMoving = workspace:FindFirstChild("AmbushMoving"),
-        A60 = workspace:FindFirstChild("A60"),
-        A120 = workspace:FindFirstChild("A120")
-    }
-
-    local dangerDetected = false
-
-    for name, entity in pairs(entities) do
-        if entity and savedPosition then
-            print("Entity detected:", name)
-
-            -- Generate a random teleport offset between 50 and 100
-            local teleportOffset = math.random(TELEPORT_MIN_OFFSET, TELEPORT_MAX_OFFSET)
-            local newPosition = savedPosition + Vector3.new(0, teleportOffset, 0)
-            humanoidRootPart.CFrame = CFrame.new(newPosition)
-            print("Teleported due to entity:", name)
-
-            dangerDetected = true
-            break
+    if GODMODEDANGER == true then
+        if INAIR == false then
+            INAIR = true
+            TELEPORTGODMODESTORAGE = POSITION
+            TELEPORTGODMODEENDPOINT = TELEPORTGODMODESTORAGE + Vector3.new(0, 50, 0)
         end
+
+        ONGROUNDSAFELY = false
+    
+        PLAYER.Character.HumanoidRootPart.CFrame = CFrame.new(TELEPORTGODMODEENDPOINT)
+
+    else
+
+        if ONGROUNDSAFELY == false then
+            ONGROUNDSAFELY = true
+            PLAYER.Character.HumanoidRootPart.CFrame = CFrame.new(TELEPORTGODMODESTORAGE)
+        end
+
+        INAIR = false
+        TELEPORTGODMODESTORAGE = nil
+
     end
 
-    -- If no danger detected and savedPosition exists, reset the player to the saved position
-    if not dangerDetected and savedPosition then
-        humanoidRootPart.CFrame = CFrame.new(savedPosition)
-        print("No danger detected, returning to saved position.")
-        savedPosition = nil  -- Clear the saved position after teleporting back down
-    end
 end
 
 local godmode_crash_reason = ""
@@ -746,31 +735,31 @@ end
 
 local DividerPro1 = PremiumTab:CreateDivider()
 
---local GodModeToggle = PremiumTab:CreateToggle({
---    Name = "Godmode",
---    CurrentValue = false,
---    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
---    Callback = function(Value)
---    Godmode = Value
---    if shownotificationsforsuccess == true then
---   if Value == true then
---      Rayfield:Notify({
---            Title = "Success",
---            Content = "Godmode for Rush/Ambush is now on!",
---            Duration = 3,
---           Image = 4483362458,
---         })
---    else
---        Rayfield:Notify({
---            Title = "Success",
---            Content = "Godmode for Rush/Ambush is now off!",
---            Duration = 3,
---           Image = 4483362458,
---         })
---    end
---end
---    end,
--- })
+local GodModeToggle = PremiumTab:CreateToggle({
+    Name = "Godmode",
+    CurrentValue = false,
+    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+    Godmode = Value
+    if shownotificationsforsuccess == true then
+   if Value == true then
+      Rayfield:Notify({
+            Title = "Success",
+            Content = "Godmode for Rush/Ambush is now on!",
+            Duration = 3,
+           Image = 4483362458,
+         })
+    else
+        Rayfield:Notify({
+            Title = "Success",
+            Content = "Godmode for Rush/Ambush is now off!",
+            Duration = 3,
+           Image = 4483362458,
+         })
+    end
+end
+    end,
+ })
 else
     
 
