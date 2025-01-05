@@ -579,7 +579,7 @@ if VIP == true then
     Duration = 6.5,
     Image = "badge-plus",
  })
- displayDoorsMessage("Your Premium Status was loaded!", 5000)
+ displayDoorsMessage("Your Premium Status was loaded!", 2000)
 else
     Rayfield:Notify({
         Title = "Info:",
@@ -587,9 +587,9 @@ else
         Duration = 6.5,
         Image = "badge-plus",
     })
-    displayDoorsMessage("This is a free Preview!", 3000)
-    wait(3)
-    displayDoorsMessage("Unlock all features by buying PRO.", 10000)
+    displayDoorsMessage("This is a free Preview!", 1000)
+    wait(1)
+    displayDoorsMessage("Unlock all features by buying getting a FREE key!", 3000)
 end
 
  local MainTab = Window:CreateTab("Script Hub", "archive") -- Title, Image
@@ -1127,33 +1127,33 @@ local DividerPro1 = PremiumTab:CreateDivider()
 --    end,
 -- })
 
-local EyesDamageBypassToggle = PremiumTab:CreateToggle({
-    Name = "Bypass Eyes Damage",
-    CurrentValue = false,
-    Flag = "EyesDamageBypassToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    Callback = function(Value)
-        BypassEyesDamage = Value
-        if Value == true then
-        
-            Rayfield:Notify({
-                Title = "Bypassing Eyes",
-                Content = "Ok, we are now bypassing Eyes.",
-                Duration = 4,
-                Image = "rewind",
-             })
-        
-        else
-
-            Rayfield:Notify({
-                Title = "Bypassing Eyes",
-                Content = "Ok, we are no longer bypassing Eyes.",
-                Duration = 4,
-                Image = "rewind",
-             })
-
-        end
-    end,
- })
+--local EyesDamageBypassToggle = PremiumTab:CreateToggle({
+--    Name = "Bypass Eyes Damage",
+--    CurrentValue = false,
+--    Flag = "EyesDamageBypassToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+--    Callback = function(Value)
+--        BypassEyesDamage = Value
+--        if Value == true then
+--        
+--            Rayfield:Notify({
+--                Title = "Bypassing Eyes",
+--                Content = "Ok, we are now bypassing Eyes.",
+--                Duration = 4,
+--                Image = "rewind",
+--             })
+--        
+--        else
+--
+--            Rayfield:Notify({
+--                Title = "Bypassing Eyes",
+--                Content = "Ok, we are no longer bypassing Eyes.",
+--               Duration = 4,
+ --               Image = "rewind",
+--             })
+--
+--        end
+--    end,
+-- })
 else
     
 
