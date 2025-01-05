@@ -1,27 +1,6 @@
 local INPUTOFKEYFIELD = ""
 local DidLoadProData = false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 local player = game.Players.LocalPlayer
 
 -- Ensure that PlayerData exists in the Player
@@ -1181,7 +1160,7 @@ else
     local titelPROnotbought = PremiumTab:CreateLabel("You have not bought Premium.", "rewind")
     local Paragraph = PremiumTab:CreateParagraph({Title = "What you are missing out for:", Content = MissingOutOn})
     local DividerPro11 = PremiumTab:CreateDivider()
-    local Button = Tab:CreateButton({
+    local GetAProKeyButton = PremiumTab:CreateButton({
         Name = "Get a PRO Key",
         Callback = function()
             copyLink()
