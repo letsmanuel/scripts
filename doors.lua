@@ -1,5 +1,11 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local BypassEyesDamage = false
+
+
+
+
+
 local function displayDoorsMessage(message, durationInMilliseconds)
   
     local durationInSeconds = durationInMilliseconds / 1000
@@ -161,7 +167,7 @@ local function godmode_tick()
         end
 
         INAIR = false
-        TELEPORTGODMODESTORAGE = nil
+        TELEPORTGODMODESTORAGE = ""
 
     end
 
@@ -743,29 +749,57 @@ end
 
 local DividerPro1 = PremiumTab:CreateDivider()
 
-local GodModeToggle = PremiumTab:CreateToggle({
-    Name = "Godmode",
+--local GodModeToggle = PremiumTab:CreateToggle({
+--    Name = "Godmode",
+--    CurrentValue = false,
+--    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+--    Callback = function(Value)
+--    Godmode = Value
+--    if shownotificationsforsuccess == true then
+--   if Value == true then
+--      Rayfield:Notify({
+--            Title = "Success",
+--            Content = "Godmode for Rush/Ambush is now on!",
+--            Duration = 3,
+--           Image = 4483362458,
+--         })
+--    else
+--        Rayfield:Notify({
+--            Title = "Success",
+--            Content = "Godmode for Rush/Ambush is now off!",
+--            Duration = 3,
+--           Image = 4483362458,
+ --        })
+  --  end
+--end
+--    end,
+-- })
+
+local EyesDamageBypassToggle = PremiumTab:CreateToggle({
+    Name = "Bypass Eyes Damage",
     CurrentValue = false,
-    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Flag = "EyesDamageBypassToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
-    Godmode = Value
-    if shownotificationsforsuccess == true then
-   if Value == true then
-      Rayfield:Notify({
-            Title = "Success",
-            Content = "Godmode for Rush/Ambush is now on!",
-            Duration = 3,
-           Image = 4483362458,
-         })
-    else
-        Rayfield:Notify({
-            Title = "Success",
-            Content = "Godmode for Rush/Ambush is now off!",
-            Duration = 3,
-           Image = 4483362458,
-         })
-    end
-end
+        BypassEyesDamage = Value
+        if Value == true then
+        
+            Rayfield:Notify({
+                Title = "Bypassing Eyes",
+                Content = "Ok, we are now bypassing Eyes.",
+                Duration = 4,
+                Image = "rewind",
+             })
+        
+        else
+
+            Rayfield:Notify({
+                Title = "Bypassing Eyes",
+                Content = "Ok, we are no longer bypassing Eyes.",
+                Duration = 4,
+                Image = "rewind",
+             })
+
+        end
     end,
  })
 else
@@ -1106,7 +1140,9 @@ while true do
         calculatePingNotifier()
     end
 
-
+    if BypassEyesDamage == true and (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("BackdoorLookman")) then
+        Script.RemotesFolder.MotorReplication:FireServer(-649)
+    end
 
     task.wait(0.1)
 end
