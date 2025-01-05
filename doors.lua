@@ -4,13 +4,13 @@ local DidLoadProData = false
 
 
 local UserSettings = game:GetService("UserSettings")
-local playerSettings = UserSettings:GetService("UserGameSettings")
+local playerSettings = UserSettings:FindFirstChildOfClass("UserGameSettings")
 
 local function noKeyFound()
 
 end
 
--- Function to load data from UserSettings
+
 local function loadData(key)
     local value = playerSettings:GetValue(key)
 
@@ -27,12 +27,6 @@ local LOADEDKEY = loadData("PLATOBOOSTVERIFYCURRENTKEYP6AULSDOORSSCRIPT")
 if LOADEDKEY then
     DidLoadProData = true
 end
-
--- Try to load data that doesn't exist
-local nonexistentData = loadData("nonExistentKey")
--- Output: No data found! followed by "Health data not found"
-
-
 -------------------------------------------------------------------------------
 --! json library
 --! cryptography library
