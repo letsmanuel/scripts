@@ -349,8 +349,10 @@ end
 
 local VIP
 
+VIP = false
+
 if DidLoadProData == true then
-local USERHADOKKEY = verifyKey(LOADEDKEY)
+local USERHADOKKEY = verifyKey(LOADEDKEY);
 if USERHADOKKEY then
     VIP = true
 else
