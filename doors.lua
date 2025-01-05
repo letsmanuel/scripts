@@ -128,10 +128,10 @@ local function godmode_tick()
     local PLAYER = game.Players.LocalPlayer
     local TRESHHOLD = 50
     local MAXPING = 400
-    local godmodeA60 = workspace:FindFirstChild(A60) ~= nil
-    local godmodeA120 = workspace:FindFirstChild(A120) ~= nil
-    local godmodeRUSH = workspace:FindFirstChild(RushMoving) ~= nil
-    local godmodeAMBUSH = workspace:FindFirstChild(AmbushMoving) ~= nil
+    local godmodeA60 = workspace:FindFirstChild("A60") ~= nil
+    local godmodeA120 = workspace:FindFirstChild("A120") ~= nil
+    local godmodeRUSH = workspace:FindFirstChild("RushMoving") ~= nil
+    local godmodeAMBUSH = workspace:FindFirstChild("AmbushMoving") ~= nil
     local GODMODEDANGER = false
     local POSITION = PLAYER.Character.HumanoidRootPart.Position
     local INAIR = false
