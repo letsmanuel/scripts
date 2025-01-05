@@ -1,29 +1,36 @@
 local INPUTOFKEYFIELD = ""
 local DidLoadProData = false
 
+local player = game.Players.LocalPlayer
 
+-- Ensure that PlayerData exists in the Player
+local playerData = player:WaitForChild("PlayerData") or Instance.new("Folder", player)
+playerData.Name = "PlayerData"
 
-local UserSettings = game:GetService("UserSettings")
-local playerSettings = UserSettings:FindFirstChildOfClass("UserGameSettings")
-
-local function noKeyFound()
-
+-- Function to save data
+local function saveData(key, value)
+    -- Store data as an attribute for this session
+    playerData:SetAttribute(key, value)
 end
 
-
+-- Function to load data
 local function loadData(key)
-    local value = playerSettings:GetValue(key)
-
+    -- Retrieve data from PlayerData
+    local value = playerData:GetAttribute(key)
+    
+    -- Return nil if no data is found for the key
     if value == nil then
-        noKeyFound()
         return nil
     end
     
     return value
 end
 
+-- Example usage
+saveData("PlayerScore", 100)  -- Save score
+local LOADEDKEY = loadData("DOORSSCRIPTKEY")  -- Load score
 
-local LOADEDKEY = loadData("PLATOBOOSTVERIFYCURRENTKEYP6AULSDOORSSCRIPT")
+
 if LOADEDKEY then
     DidLoadProData = true
 end
@@ -1174,7 +1181,7 @@ else
         Callback = function()
             local successManuelRedeemKey = verifyKey(INPUTOFKEYFIELD);
             if successManuelRedeemKey then
-                playerSettings:SetValue("PLATOBOOSTVERIFYCURRENTKEYP6AULSDOORSSCRIPT", INPUTOFKEYFIELD)
+                saveData("DOORSSCRIPTKEY", INPUTOFKEYFIELD)
                 displayDoorsMessage("Key redeemed. Restarting...", 1500)
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/MicrobitApps/scripts/refs/heads/main/doors.lua",true))()
             else
