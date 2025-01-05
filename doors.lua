@@ -4,7 +4,7 @@ local DidLoadProData = false
 local player = game.Players.LocalPlayer
 
 -- Ensure that PlayerData exists in the Player
-local playerData = player:WaitForChild("PlayerData") or Instance.new("Folder", player)
+local playerData = player:FindFirstChild("PlayerData") or Instance.new("Folder", player)
 playerData.Name = "PlayerData"
 
 -- Function to save data
