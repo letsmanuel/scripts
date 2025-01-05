@@ -1141,7 +1141,7 @@ while true do
     end
 
     if BypassEyesDamage == true and (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("BackdoorLookman")) then
-        game.ReplicatedStorage.RemotesFolder.MotorReplication:FireServer(0, -90, 0, false)
+        game.ReplicatedStorage.RemotesFolder.MotorReplication:FireServer(-649)
         print('Looser eyes!!')
     end
 
