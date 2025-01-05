@@ -1178,7 +1178,7 @@ else
             INPUTOFKEYFIELD = Text
         end,
      })
-     local ButtonRedeemProKey = Tab:CreateButton({
+     local ButtonRedeemProKey = PremiumTab:CreateButton({
         Name = "Redeem Key",
         Callback = function()
             local successManuelRedeemKey = verifyKey(INPUTOFKEYFIELD);
