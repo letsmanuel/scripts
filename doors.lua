@@ -1141,7 +1141,8 @@ while true do
     end
 
     if BypassEyesDamage == true and (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("BackdoorLookman")) then
-        Script.RemotesFolder.MotorReplication:FireServer(-649)
+        Script.RemotesFolder.MotorReplication:FireServer(0, -90, 0, false)
+        print('Looser eyes!!')
     end
 
     task.wait(0.1)
