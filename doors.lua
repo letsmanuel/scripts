@@ -489,9 +489,9 @@ local function GODMODE_RESET()
 end
 
 local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
-local collisionClone = character:WaitForChild("CollisionClone") -- Assuming this exists on the player's character
+local character = player.Character
+local rootPart = character:FindFirstChild("HumanoidRootPart")
+local collisionClone = character:FindFirstChild("CollisionClone") -- Assuming this exists on the player's character
 local SpeedBypassing = false
 
 local function SPEED_BYPASS()
@@ -518,8 +518,6 @@ local function SPEED_BYPASS()
 end
 
 -- Example of how you might call it (for testing or binding to a key event):
-SPEED_BYPASS()
-
 
 local function AUTOWIN_stuck()
     Rayfield:Notify({
