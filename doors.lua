@@ -1,5 +1,6 @@
 local INPUTOFKEYFIELD = ""
 local DidLoadProData = false
+local AUTOWIN = false
 
 local player = game.Players.LocalPlayer
 
@@ -458,6 +459,150 @@ local Window = Rayfield:CreateWindow({
        Key = {"p6aulsadmin","345345","12345", "67890", "23456", "98765", "34567", "45678", "56789", "87654", "54321", "65432", "76543", "43210", "21098", "10987", "32109", "89012", "67812", "45123", "85236", "96325", "74152", "85214", "95173", "75314", "12435", "65789", "78963", "96314", "35714", "25814", "35914", "74163", "25893", "14725", "36982", "58462", "91435", "63582", "52684", "18395", "29486", "57813", "96732", "31685", "92463", "17538", "38652", "51924", "84639", "13574", "39285", "67421"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
     }
  })
+
+
+local function AUTOWIN_stuck()
+    Rayfield:Notify({
+        Title = "Seems like your stuck.",
+        Content = "Recalculating path.",
+        Duration = 3,
+        Image = "rewind",
+     })
+end
+
+local function AUTOWIN_nextdoor()
+    Rayfield:Notify({
+        Title = "Autowin: Door opened",
+        Content = "Generating path.",
+        Duration = 3,
+        Image = "rewind",
+     })
+end
+
+local function AUTOWIN_collectkey()
+    Rayfield:Notify({
+        Title = "Your turn.",
+        Content = "Collect the key please!",
+        Duration = 3,
+        Image = "rewind",
+     })
+end
+
+ local PathfindingService = game:GetService("PathfindingService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local visitedDoors = {}
+local savedPath = nil
+local currentWaypointIndex = 1
+local stuckTimer = 0
+local stuckThreshold = 3 -- Time in seconds to detect being stuck
+local lastPosition = nil
+
+local function findNearestModel(modelName)
+    local nearestModel = nil
+    local nearestDistance = math.huge
+
+    for _, model in ipairs(workspace:GetDescendants()) do
+        if model:IsA("Model") and model.Name == modelName and not table.find(visitedDoors, model) then
+            local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+            if primaryPart then
+                local distance = (primaryPart.Position - rootPart.Position).Magnitude
+                if distance < nearestDistance then
+                    nearestModel = model
+                    nearestDistance = distance
+                end
+            end
+        end
+    end
+
+    return nearestModel
+end
+
+local function generatePath(targetModel)
+    if not targetModel then return nil end
+
+    local primaryPart = targetModel.PrimaryPart or targetModel:FindFirstChildWhichIsA("BasePart")
+    if not primaryPart then return nil end
+
+    local path = PathfindingService:CreatePath({
+        AgentRadius = 2,
+        AgentHeight = 5,
+        AgentCanJump = true,
+        AgentJumpHeight = humanoid.JumpHeight,
+        AgentMaxSlope = humanoid.MaxSlopeAngle
+    })
+
+    path:ComputeAsync(rootPart.Position, primaryPart.Position)
+
+    if path.Status == Enum.PathStatus.Complete then
+        return path:GetWaypoints()
+    end
+
+    return nil
+end
+
+function autoWin_tick()
+    -- If there is no saved path or the path is fully traversed
+    if not savedPath or currentWaypointIndex > #savedPath then
+        local keyObtain = findNearestModel("KeyObtain")
+
+        if keyObtain then
+            AUTOWIN_collectkey() -- Notify user to collect key
+            savedPath = generatePath(keyObtain)
+        else
+            local nearestDoor = findNearestModel("Door")
+
+            if nearestDoor then
+                AUTOWIN_nextdoor() -- Notify user a door is opened
+                savedPath = generatePath(nearestDoor)
+                table.insert(visitedDoors, nearestDoor)
+            end
+        end
+
+        currentWaypointIndex = 1 -- Reset the waypoint index
+    end
+
+    -- Step through the saved path
+    if savedPath and currentWaypointIndex <= #savedPath then
+        local waypoint = savedPath[currentWaypointIndex]
+        humanoid:MoveTo(waypoint.Position)
+
+        local moveStarted = tick()
+        while humanoid.MoveToFinished:Wait(0.1) do
+            -- Check if stuck by comparing position over time
+            local currentPosition = rootPart.Position
+            if lastPosition and (currentPosition - lastPosition).Magnitude < 0.5 then
+                stuckTimer = stuckTimer + (tick() - moveStarted)
+            else
+                stuckTimer = 0
+            end
+
+            lastPosition = currentPosition
+
+            if stuckTimer > stuckThreshold then
+                -- Notify user of being stuck
+                AUTOWIN_stuck()
+
+                -- Recalculate path if stuck
+                local targetModel = findNearestModel("KeyObtain") or findNearestModel("Door")
+                if targetModel then
+                    savedPath = generatePath(targetModel)
+                    currentWaypointIndex = 1 -- Reset index after recalculating
+                end
+                break
+            end
+        end
+
+        currentWaypointIndex = currentWaypointIndex + 1
+    end
+end
+
+
 
  local function create_notification(title, content, duration, image)
     Rayfield:Notify({
@@ -1154,6 +1299,15 @@ local DividerPro1 = PremiumTab:CreateDivider()
 --        end
 --    end,
 -- })
+
+local autowinToggle = Tab:CreateToggle({
+    Name = "Auto Win",
+    CurrentValue = false,
+    Flag = "autowinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+   AUTOWIN = Value
+    end,
+ })
 else
     
 
@@ -1533,6 +1687,11 @@ while true do
     if BypassEyesDamage == true and (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("BackdoorLookman")) then
         game.ReplicatedStorage.RemotesFolder.MotorReplication:FireServer(-649)
         print('Looser eyes!!')
+    end
+
+
+    if AUTOWIN == true then
+        autoWin_tick()
     end
 
     task.wait(0.1)
