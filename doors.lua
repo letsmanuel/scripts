@@ -1300,7 +1300,7 @@ local DividerPro1 = PremiumTab:CreateDivider()
 --    end,
 -- })
 
-local autowinToggle = Tab:CreateToggle({
+local autowinToggle = PremiumTab:CreateToggle({
     Name = "Auto Win",
     CurrentValue = false,
     Flag = "autowinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
