@@ -488,7 +488,7 @@ local function AUTOWIN_collectkey()
      })
 end
 
- local PathfindingService = game:GetService("PathfindingService")
+local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 
 local player = Players.LocalPlayer
@@ -539,7 +539,7 @@ local function generatePath(targetModel)
 
     path:ComputeAsync(rootPart.Position, primaryPart.Position)
 
-    if path.Status == Enum.PathStatus.Complete then
+    if path.Status == Enum.PathStatus.Success then
         return path:GetWaypoints()
     end
 
@@ -601,6 +601,21 @@ function autoWin_tick()
         currentWaypointIndex = currentWaypointIndex + 1
     end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
