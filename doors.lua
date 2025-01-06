@@ -491,20 +491,34 @@ end
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
+local collisionClone = character:WaitForChild("CollisionClone") -- Assuming this exists on the player's character
+local SpeedBypassing = false
 
 local function SPEED_BYPASS()
-    if rootPart then
-        if rootPart.Anchored then
-            -- Apply massless effect while anchored (replace with your logic)
-            rootPart.Massless = true
-            repeat task.wait() until not rootPart.Anchored
-            task.wait(0.15)
-        else
-            -- Apply massless effect when not anchored (replace with your logic)
-            rootPart.Massless = true
+    if SpeedBypassing or not collisionClone then return end
+    SpeedBypassing = true
+
+    task.spawn(function()
+        while SPEEDBYPASS and collisionClone and character and not character:FindFirstChild("HumanoidRootPart") do
+            if rootPart.Anchored then
+                collisionClone.Massless = true
+                repeat task.wait() until not rootPart.Anchored
+                task.wait(0.15)
+            else
+                collisionClone.Massless = true
+            end
+            task.wait(Options.SpeedBypassDelay.Value)
         end
-    end
+
+        SpeedBypassing = false
+        if collisionClone then
+            collisionClone.Massless = true
+        end
+    end)
 end
+
+-- Example of how you might call it (for testing or binding to a key event):
+SPEED_BYPASS()
 
 
 local function AUTOWIN_stuck()
@@ -1545,6 +1559,7 @@ end
     Flag = "MoveSpeedBypassToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
         SPEEDBYPASS = Value
+        SPEED_BYPASS()
     end,
  })
 
@@ -1795,10 +1810,6 @@ while true do
         autoWin_tick()
     end
 
-
-    if SPEEDBYPASS == true then
-        SPEED_BYPASS()
-    end
 
     task.wait(0.1)
 end
