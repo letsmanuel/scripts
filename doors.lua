@@ -1,6 +1,8 @@
 local INPUTOFKEYFIELD = ""
 local DidLoadProData = false
 local AUTOWIN = false
+local GODMODEENABLED = false
+local GODMODESTATUS = 0
 
 local player = game.Players.LocalPlayer
 
@@ -459,6 +461,31 @@ local Window = Rayfield:CreateWindow({
        Key = {"p6aulsadmin","345345","12345", "67890", "23456", "98765", "34567", "45678", "56789", "87654", "54321", "65432", "76543", "43210", "21098", "10987", "32109", "89012", "67812", "45123", "85236", "96325", "74152", "85214", "95173", "75314", "12435", "65789", "78963", "96314", "35714", "25814", "35914", "74163", "25893", "14725", "36982", "58462", "91435", "63582", "52684", "18395", "29486", "57813", "96732", "31685", "92463", "17538", "38652", "51924", "84639", "13574", "39285", "67421"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
     }
  })
+
+
+ local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local originalPosition = character.HumanoidRootPart.Position
+
+local function GODMODE_OFFSET()
+    if character:FindFirstChild("Collision") then
+        character.Collision.Position = character.HumanoidRootPart.Position - Vector3.new(0, 2.5, 0)
+    else
+        warn("Collision part not found in the character!")
+    end
+end
+
+local function GODMODE_RESET()
+    if character:FindFirstChild("Collision") then
+        character.Collision.Position = originalPosition
+    else
+        warn("Collision part not found in the character!")
+    end
+end
 
 
 local function AUTOWIN_stuck()
@@ -1315,12 +1342,23 @@ local DividerPro1 = PremiumTab:CreateDivider()
 --    end,
 -- })
 
-local autowinToggle = PremiumTab:CreateToggle({
-    Name = "Auto Win",
+--local autowinToggle = PremiumTab:CreateToggle({
+--    Name = "Auto Win",
+--    CurrentValue = false,
+---    Flag = "autowinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+--    Callback = function(Value)
+--   AUTOWIN = Value
+--    end,
+-- })
+
+
+
+local GodModeToggle = PremiumTab:CreateToggle({
+    Name = "Godmode",
     CurrentValue = false,
-    Flag = "autowinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
-   AUTOWIN = Value
+        GODMODEENABLED = Value
     end,
  })
 else
@@ -1690,8 +1728,14 @@ while true do
         setSpeed(game.Players.LocalPlayer, 15)
     end
 
-    if Godmode == true then
-        godmode_tick_handle()
+    if GODMODEENABLED == true then
+      GODMODE_OFFSET()
+      GODMODESTATUS = 1
+    else
+        if GODMODESTATUS == 1 then
+        GODMODE_RESET()
+        GODMODESTATUS = 0
+        end
     end
 
     local ping = player:GetNetworkPing()
