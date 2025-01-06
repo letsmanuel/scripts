@@ -3,6 +3,7 @@ local DidLoadProData = false
 local AUTOWIN = false
 local GODMODEENABLED = false
 local GODMODESTATUS = 0
+local SPEEDBYPASS = false
 
 local player = game.Players.LocalPlayer
 
@@ -484,6 +485,24 @@ local function GODMODE_RESET()
         character.Collision.Position = originalPosition
     else
         warn("Collision part not found in the character!")
+    end
+end
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local function SPEED_BYPASS()
+    if rootPart then
+        if rootPart.Anchored then
+            -- Apply massless effect while anchored (replace with your logic)
+            rootPart.Massless = true
+            repeat task.wait() until not rootPart.Anchored
+            task.wait(0.15)
+        else
+            -- Apply massless effect when not anchored (replace with your logic)
+            rootPart.Massless = true
+        end
     end
 end
 
@@ -1359,6 +1378,14 @@ local GodModeToggle = PremiumTab:CreateToggle({
     Flag = "GodModeToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
         GODMODEENABLED = Value
+        if Value == true then
+        Rayfield:Notify({
+            Title = "Just saying:",
+            Content = "Godmode is just fucking buggy. Crouch while using!!",
+            Duration = 3,
+            Image = "coins",
+         })
+        end
     end,
  })
 else
@@ -1371,6 +1398,12 @@ else
         Name = "Get a PRO Key",
         Callback = function()
             copyLink()
+            Rayfield:Notify({
+                Title = "Link copied!",
+                Content = "Open in your browser and complete the steps!",
+                Duration = 3,
+                Image = "coins",
+             })
         end,
     })
     local DividerPro12 = PremiumTab:CreateDivider()
@@ -1503,6 +1536,15 @@ end
     Flag = "MoveSpeedDuringSeekToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
     Callback = function(Value)
         speedBoostDuringSeek = Value
+    end,
+ })
+
+ local MoveSpeedBypassToggle = ExploitTab:CreateToggle({
+    Name = "Bypass Speed Anticheat",
+    CurrentValue = false,
+    Flag = "MoveSpeedBypassToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        SPEEDBYPASS = Value
     end,
  })
 
@@ -1751,6 +1793,11 @@ while true do
 
     if AUTOWIN == true then
         autoWin_tick()
+    end
+
+
+    if SPEEDBYPASS == true then
+        SPEED_BYPASS()
     end
 
     task.wait(0.1)
